@@ -4,7 +4,7 @@
 using namespace api::chat;
 
 grpc::ServerUnaryReactor *
-ChatApiService2::Login(grpc::CallbackServerContext *context, const User *user, None *none) {
+ChatApiService::Login(grpc::CallbackServerContext *context, const User *user, None *none) {
     auto reactor = context->DefaultReactor();
 
     // Authenticate user

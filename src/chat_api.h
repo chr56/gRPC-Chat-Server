@@ -12,9 +12,9 @@
 #include "authenticator.h"
 
 
-class ChatApiService final : public api::chat::SimpleChat::CallbackService {
+class SimpleChatApiService final : public api::chat::SimpleChat::CallbackService {
 public:
-    ChatApiService() : _messages(), _clients() {}
+    SimpleChatApiService() : _messages(), _clients() {}
 
     grpc::ServerUnaryReactor *SendMessage(
             grpc::CallbackServerContext *context, const api::chat::ChatMessage *request, api::chat::None *response) override;
@@ -39,9 +39,9 @@ private:
     class MessageStreamReactor;
 };
 
-class ChatApiService2 final : public api::chat::Chat::CallbackService {
+class ChatApiService final : public api::chat::Chat::CallbackService {
 public:
-    ChatApiService2() : _messages(), _clients() {}
+    ChatApiService() : _messages(), _clients() {}
 
     grpc::ServerUnaryReactor *
     Login(::grpc::CallbackServerContext *context, const ::api::chat::User *user, ::api::chat::None *none) override;

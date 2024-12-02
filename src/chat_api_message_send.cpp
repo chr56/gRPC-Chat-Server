@@ -5,7 +5,7 @@
 
 using namespace api::chat;
 
-grpc::ServerUnaryReactor *ChatApiService::SendMessage(
+grpc::ServerUnaryReactor *SimpleChatApiService::SendMessage(
         grpc::CallbackServerContext *context, const ChatMessage *request, None *response
 ) {
     auto reactor = context->DefaultReactor();
@@ -29,15 +29,15 @@ grpc::ServerUnaryReactor *ChatApiService::SendMessage(
     return reactor;
 }
 
-void ChatApiService::notifyClients(const ChatMessage &message) {
+void SimpleChatApiService::notifyClients(const ChatMessage &message) {
     for (auto client: _clients) {
         client->NotifyNewMessage(message);
     }
 }
 
 grpc::ServerUnaryReactor *
-ChatApiService2::SendMessageTo(::grpc::CallbackServerContext *context, const ::api::chat::SendMessageRequest *request,
-                               ::api::chat::None *none) {
+ChatApiService::SendMessageTo(::grpc::CallbackServerContext *context, const ::api::chat::SendMessageRequest *request,
+                              ::api::chat::None *none) {
     auto reactor = context->DefaultReactor();
 
     // Authenticate user
@@ -59,7 +59,7 @@ ChatApiService2::SendMessageTo(::grpc::CallbackServerContext *context, const ::a
     return reactor;
 }
 
-void ChatApiService2::notifyClients(uint64_t dialogId, const ChatMessage &message) {
+void ChatApiService::notifyClients(uint64_t dialogId, const ChatMessage &message) {
     for (auto client: _clients) {
         client->NotifyNewMessage(message);
     }

@@ -4,7 +4,7 @@
 std::string server_address("localhost:65002");
 
 void RunServer() {
-    ChatApiService service;
+    SimpleChatApiService service;
 
     grpc::ServerBuilder builder;
     builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
