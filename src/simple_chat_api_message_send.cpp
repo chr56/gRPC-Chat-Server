@@ -1,12 +1,10 @@
-#include <iostream>
-
-#include "chat_api.h"
+#include "simple_chat_api.h"
 
 using namespace api::chat;
 
-grpc::ServerUnaryReactor *
-ChatApiService::SendMessageTo(::grpc::CallbackServerContext *context, const ::api::chat::SendMessageRequest *request,
-                              ::api::chat::None *none) {
+grpc::ServerUnaryReactor *SimpleChatApiService::SendMessage(
+        grpc::CallbackServerContext *context, const ChatMessage *request, None *response
+) {
     auto reactor = context->DefaultReactor();
 
     // Authenticate user
@@ -17,20 +15,20 @@ ChatApiService::SendMessageTo(::grpc::CallbackServerContext *context, const ::ap
         return reactor;
     }
 
-    //  Notify new messages to other clients
+    // Add message to the list and notify clients
     auto *msg = _messages.add_messages();
+    *msg = *request;
     msg->set_from(*name);
-    *msg = request->message();
-    uint64_t id = request->to();
-    notifyClients(id, *msg);
+
+    notifyClients(*msg);
 
     reactor->Finish(grpc::Status::OK);
     return reactor;
 }
 
-void ChatApiService::notifyClients(uint64_t dialogId, const ChatMessage &message) {
+
+void SimpleChatApiService::notifyClients(const api::chat::ChatMessage &message) {
     for (auto client: _clients) {
         client->NotifyNewMessage(message);
     }
 }
-

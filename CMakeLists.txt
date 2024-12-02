@@ -14,6 +14,8 @@ add_executable(chat_api_server
     src/chat_api_login.cpp
     src/chat_api_message_fetch.cpp
     src/chat_api_message_send.cpp
+    src/simple_chat_api_message_fetch.cpp
+    src/simple_chat_api_message_send.cpp
     )
 
 target_link_libraries(

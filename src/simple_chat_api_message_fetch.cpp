@@ -1,14 +1,12 @@
+#include "simple_chat_api.h"
 #include <iostream>
-
-#include "chat_api.h"
 
 using namespace api::chat;
 
-
-class ChatApiService::MessageStreamReactor : public grpc::ServerWriteReactor<ChatMessages>, ChatApiService::Client {
+class SimpleChatApiService::MessageStreamReactor : public grpc::ServerWriteReactor<ChatMessages>, SimpleChatApiService::Client {
 public:
-    MessageStreamReactor(ChatApiService *service, grpc::CallbackServerContext *context, const FetchMessageListRequest *request)
-            : _service(service), _context(context), _request(request) {}
+    MessageStreamReactor(SimpleChatApiService *service, grpc::CallbackServerContext *context)
+            : _service(service), _context(context) {}
 
     void Start() {
 
@@ -86,9 +84,8 @@ public:
 
 private:
 
-    ChatApiService *_service;
+    SimpleChatApiService *_service;
     grpc::CallbackServerContext *_context;
-    const FetchMessageListRequest *_request; // todo
 
     std::string _username;
 
@@ -97,9 +94,11 @@ private:
     std::list<ChatMessages> _pendingMessages;
 };
 
+
+
 grpc::ServerWriteReactor<api::chat::ChatMessages> *
-ChatApiService::FetchMessageList(grpc::CallbackServerContext *context, const FetchMessageListRequest *request) {
-    auto reactor = new ChatApiService::MessageStreamReactor(this, context, request);
+SimpleChatApiService::FetchMessageList(grpc::CallbackServerContext *context, const api::chat::None *request) {
+    auto reactor = new MessageStreamReactor(this, context);
     reactor->Start();
     return reactor;
 }

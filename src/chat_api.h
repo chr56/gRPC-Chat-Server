@@ -12,33 +12,6 @@
 #include "authenticator.h"
 
 
-class SimpleChatApiService final : public api::chat::SimpleChat::CallbackService {
-public:
-    SimpleChatApiService() : _messages(), _clients() {}
-
-    grpc::ServerUnaryReactor *SendMessage(
-            grpc::CallbackServerContext *context, const api::chat::ChatMessage *request, api::chat::None *response) override;
-
-    grpc::ServerWriteReactor<api::chat::ChatMessages> *FetchMessageList(
-            grpc::CallbackServerContext *context, const api::chat::None *request) override;
-
-
-private:
-
-    class Client {
-    public:
-        virtual void NotifyNewMessage(const api::chat::ChatMessage &message) = 0;
-    };
-
-    void notifyClients(const api::chat::ChatMessage &message);
-
-    Authenticator authenticator;
-    api::chat::ChatMessages _messages;
-    std::list<Client *> _clients;
-
-    class MessageStreamReactor;
-};
-
 class ChatApiService final : public api::chat::Chat::CallbackService {
 public:
     ChatApiService() : _messages(), _clients() {}
