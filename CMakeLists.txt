@@ -14,12 +14,24 @@ add_executable(chat_api_server
     src/chat_api_login.cpp
     src/chat_api_message_fetch.cpp
     src/chat_api_message_send.cpp
+    )
+
+add_executable(old_simple_chat_api_server
+    src/server_old.cpp
+    src/authenticator.cpp
     src/simple_chat_api_message_fetch.cpp
     src/simple_chat_api_message_send.cpp
     )
 
 target_link_libraries(
     chat_api_server
+    ${_GRPC_GRPCPP}
+    ${_PROTOBUF_LIBPROTOBUF}
+    grpc_proto_chat
+)
+
+target_link_libraries(
+    old_simple_chat_api_server
     ${_GRPC_GRPCPP}
     ${_PROTOBUF_LIBPROTOBUF}
     grpc_proto_chat
