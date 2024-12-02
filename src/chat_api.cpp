@@ -41,8 +41,6 @@ public:
             _connected = false;
             _service->_clients.remove(this);
             std::cout << "Error occurs! (" << "user: " << _username << ", ok: " << ok << ", connected: " << _connected << ")\n";
-            this->Finish(grpc::Status(grpc::StatusCode::UNKNOWN, "Unexpected Failure"));
-            delete this;
             return;
         }
 
