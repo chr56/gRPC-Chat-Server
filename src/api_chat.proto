@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package api.chat;
+
+message ChatMessage {
+    enum ContentType {
+        Unknown = 0;
+        Text = 1;
+        Image = 2;
+        File = 3;
+    };
+    uint64 timestamp = 1;
+    bytes content = 2;
+    ContentType type = 3;
+    string from = 4;
+}
+
+message ChatMessages {
+    repeated ChatMessage messages = 1;
+}
+
+message User {
+    string name = 1;
+    string password = 2;
+}
+
+message Users {
+    repeated User users = 1;
+}
+
+message None {}
+
+service SimpleChat {
+    rpc FetchMessageList(None) returns (stream ChatMessages) {}
+    rpc SendMessage(ChatMessage) returns (None) {}
+}
