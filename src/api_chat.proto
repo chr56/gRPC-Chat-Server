@@ -34,3 +34,18 @@ service SimpleChat {
     rpc FetchMessageList(None) returns (stream ChatMessages) {}
     rpc SendMessage(ChatMessage) returns (None) {}
 }
+
+message SendMessageRequest {
+    ChatMessage message = 1;
+    uint64 to = 2;
+}
+
+message FetchMessageListRequest {
+    uint64 dialog_id = 1;
+}
+
+service Chat {
+    rpc Login(User) returns (None) {}
+    rpc FetchMessageList(FetchMessageListRequest) returns (stream ChatMessages) {}
+    rpc SendMessageTo(SendMessageRequest) returns (None) {}
+}
