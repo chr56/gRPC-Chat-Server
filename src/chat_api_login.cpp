@@ -15,7 +15,7 @@ ChatApiService::Login(grpc::CallbackServerContext *context, const User *user, No
         reactor->Finish(grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid credentials"));
         return reactor;
     } else {
-        std::cout << "User " << name.value() << "longed in\n";
+        std::cout << "User " << name.value() << " logged in\n";
         reactor->Finish(grpc::Status::OK);
         return reactor;
     }

@@ -50,13 +50,14 @@ public:
             StartWrite(&(_pendingMessages.front()));
             _pendingMessages.pop_front();
         } else {
-            // std::cout << "Completed to send messages to " << _username << "\n";
             _writing = false;
+            std::string msg("Completed to send messages to ");
+            std::cout << (msg + _username + "\n");
         }
     }
 
     void OnDone() override {
-        std::cout << "User " << _username << " disconnected!\n";
+        std::cout << "User " << _username << " terminated!\n";
         _connected = false;
         _service->_clients.remove(this);
         this->Finish(grpc::Status::OK);
@@ -64,7 +65,7 @@ public:
     }
 
     void OnCancel() override {
-        std::cout << "User " << _username << " canceled!\n";
+        std::cout << "User " << _username << " disconnected!\n";
         _connected = false;
     }
 
