@@ -9,7 +9,7 @@ ChatApiService::Login(grpc::CallbackServerContext *context, const UserCredential
 
     // Authenticate user
     auto metadata = context->client_metadata();
-    auto name = authenticator.check_user_credentials(metadata);
+    auto name = userManager.check_user_credentials(metadata);
     if (!name) {
         std::cout << "Illegal user tried to login!\n";
         reactor->Finish(grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid credentials"));

@@ -14,7 +14,7 @@ public:
 
         // Authenticate user
         auto metadata = _context->client_metadata();
-        auto name = _service->authenticator.check_user_credentials(metadata);
+        auto name = _service->userManager.check_user_credentials(metadata);
         if (!name) {
             this->Finish(grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid credentials"));
             delete this;

@@ -9,8 +9,8 @@
 #include "api_chat.pb.h"
 #include "api_chat.grpc.pb.h"
 
-#include "authenticator.h"
 #include "chat_manager.h"
+#include "user_manager.h"
 
 
 class ChatApiService final : public api::chat::ChatService::CallbackService {
@@ -37,7 +37,7 @@ private:
 
     void notifyClients(uint64_t chat_id, const api::chat::Message &message);
 
-    Authenticator authenticator;
+    UserManager userManager;
     ChatManager chatManager;
     std::list<Client *> _clients;
 
