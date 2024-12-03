@@ -32,10 +32,10 @@ private:
 
     class Client {
     public:
-        virtual void NotifyNewMessage(const api::chat::Message &message) = 0;
+        virtual void NotifyNewMessage(uint64_t chat_id, const api::chat::Message &message) = 0;
     };
 
-    void notifyClients(uint64_t dialogId, const api::chat::Message &message);
+    void notifyClients(uint64_t chat_id, const api::chat::Message &message);
 
     Authenticator authenticator;
     ChatManager chatManager;

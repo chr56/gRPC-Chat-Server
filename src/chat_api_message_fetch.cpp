@@ -79,17 +79,20 @@ public:
         _connected = false;
     }
 
-    void NotifyNewMessage(const Message &message) override {
+    void NotifyNewMessage(uint64_t chat_id, const Message &message) override {
         if (!_connected) return;
+
+        if (chat_id != _request->chat_id()) return;
+
 
         MessageList messages;
         *messages.add_messages() = message;
 
         if (_writing) {
-            std::cout << "Notify new message to user " << _username << " (pending)" << "\n";
+            std::cout << "Notify new message (chat " << chat_id << ") to user " << _username << " (pending)" << "\n";
             _pendingMessages.push_back(messages);
         } else {
-            std::cout << "Notify new message to user " << _username << "\n";
+            std::cout << "Notify new message (chat " << chat_id << ") to user " << _username << "\n";
             _writing = true;
             StartWrite(&messages);
         }
@@ -99,7 +102,7 @@ private:
 
     ChatApiService *_service;
     grpc::CallbackServerContext *_context;
-    const FetchMessageListRequest *_request; // todo
+    const FetchMessageListRequest *_request;
 
     std::string _username;
 

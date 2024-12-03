@@ -35,9 +35,9 @@ ChatApiService::SendMessageTo(grpc::CallbackServerContext *context, const SendMe
     return reactor;
 }
 
-void ChatApiService::notifyClients(uint64_t dialogId, const Message &message) {
+void ChatApiService::notifyClients(uint64_t chat_id, const Message &message) {
     for (auto client: _clients) {
-        client->NotifyNewMessage(message);
+        client->NotifyNewMessage(chat_id, message);
     }
 }
 
