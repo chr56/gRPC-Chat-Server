@@ -18,6 +18,12 @@ public:
 
     ~UserManager();
 
+    std::optional<api::chat::User *>
+    get_user_by_id(uint64_t id);
+
+    std::optional<api::chat::User *>
+    get_user_by_name(std::string_view name);
+
     typedef std::multimap<grpc::string_ref, grpc::string_ref> Metadata;
 
     bool check_user_credentials(std::string &name, std::string &password);
