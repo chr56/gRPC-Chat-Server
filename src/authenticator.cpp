@@ -7,6 +7,7 @@ Authenticator::Authenticator()
     api::chat::UserCredentials *newUser;
     for (int i = 1; i < 10; ++i) {
         newUser = _knownUsers.add_users();
+        newUser->set_id(i);
         newUser->set_name(std::string("user") + std::to_string(i));
         newUser->set_password("qwerty");
     }
