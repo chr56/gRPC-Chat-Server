@@ -5,7 +5,7 @@
 using namespace api::chat;
 
 
-class ChatApiService::MessageStreamReactor : public grpc::ServerWriteReactor<ChatMessages>, ChatApiService::Client {
+class ChatApiService::MessageStreamReactor : public grpc::ServerWriteReactor<MessageList>, ChatApiService::Client {
 public:
     MessageStreamReactor(ChatApiService *service, grpc::CallbackServerContext *context, const FetchMessageListRequest *request)
             : _service(service), _context(context), _request(request) {}
@@ -69,10 +69,10 @@ public:
         _connected = false;
     }
 
-    void NotifyNewMessage(const ChatMessage &message) override {
+    void NotifyNewMessage(const Message &message) override {
         if (!_connected) return;
 
-        ChatMessages messages;
+        MessageList messages;
         *messages.add_messages() = message;
 
         if (_writing) {
@@ -95,10 +95,10 @@ private:
 
     bool _connected = false;
     bool _writing = false;
-    std::list<ChatMessages> _pendingMessages;
+    std::list<MessageList> _pendingMessages;
 };
 
-grpc::ServerWriteReactor<api::chat::ChatMessages> *
+grpc::ServerWriteReactor<api::chat::MessageList> *
 ChatApiService::FetchMessageList(grpc::CallbackServerContext *context, const FetchMessageListRequest *request) {
     auto reactor = new ChatApiService::MessageStreamReactor(this, context, request);
     reactor->Start();

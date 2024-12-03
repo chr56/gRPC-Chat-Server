@@ -21,7 +21,7 @@ public:
     std::optional<std::string> check_user_credentials(Metadata &metadata);
 
 private:
-    api::chat::Users _knownUsers;
+    api::chat::UserCredentialsList _knownUsers;
 };
 
 #endif

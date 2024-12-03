@@ -4,9 +4,9 @@
 
 using namespace api::chat;
 
+
 grpc::ServerUnaryReactor *
-ChatApiService::SendMessageTo(::grpc::CallbackServerContext *context, const ::api::chat::SendMessageRequest *request,
-                              ::api::chat::None *none) {
+ChatApiService::SendMessageTo(grpc::CallbackServerContext *context, const SendMessageRequest *request, None *none) {
     auto reactor = context->DefaultReactor();
 
     // Authenticate user
@@ -19,16 +19,17 @@ ChatApiService::SendMessageTo(::grpc::CallbackServerContext *context, const ::ap
 
     //  Notify new messages to other clients
     auto *msg = _messages.add_messages();
-    msg->set_from(*name);
+    msg->set_sender_user_name(*name);
+    msg->set_sender_user_id(0);
     *msg = request->message();
-    uint64_t id = request->to();
+    uint64_t id = request->target();
     notifyClients(id, *msg);
 
     reactor->Finish(grpc::Status::OK);
     return reactor;
 }
 
-void ChatApiService::notifyClients(uint64_t dialogId, const ChatMessage &message) {
+void ChatApiService::notifyClients(uint64_t dialogId, const Message &message) {
     for (auto client: _clients) {
         client->NotifyNewMessage(message);
     }

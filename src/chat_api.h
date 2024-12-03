@@ -12,31 +12,32 @@
 #include "authenticator.h"
 
 
-class ChatApiService final : public api::chat::Chat::CallbackService {
+class ChatApiService final : public api::chat::ChatService::CallbackService {
 public:
     ChatApiService() : _messages(), _clients() {}
 
     grpc::ServerUnaryReactor *
-    Login(::grpc::CallbackServerContext *context, const ::api::chat::User *user, ::api::chat::None *none) override;
+    Login(::grpc::CallbackServerContext *context, const ::api::chat::UserCredentials *credentials, ::api::chat::None *none) override;
 
-    grpc::ServerWriteReactor<api::chat::ChatMessages> *
+    grpc::ServerWriteReactor<api::chat::MessageList> *
     FetchMessageList(::grpc::CallbackServerContext *context, const ::api::chat::FetchMessageListRequest *request) override;
 
     grpc::ServerUnaryReactor *
-    SendMessageTo(::grpc::CallbackServerContext *context, const ::api::chat::SendMessageRequest *request,
-                  ::api::chat::None *none) override;
+    SendMessageTo(::grpc::CallbackServerContext *context, const ::api::chat::SendMessageRequest *request, ::api::chat::None *none) override;
+
+
 
 private:
 
     class Client {
     public:
-        virtual void NotifyNewMessage(const api::chat::ChatMessage &message) = 0;
+        virtual void NotifyNewMessage(const api::chat::Message &message) = 0;
     };
 
-    void notifyClients(uint64_t dialogId, const api::chat::ChatMessage &message);
+    void notifyClients(uint64_t dialogId, const api::chat::Message &message);
 
     Authenticator authenticator;
-    api::chat::ChatMessages _messages;
+    api::chat::MessageList _messages;
     std::list<Client *> _clients;
 
     class MessageStreamReactor;

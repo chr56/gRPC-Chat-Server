@@ -1,28 +1,15 @@
 #include "authenticator.h"
 
+#include <string>
+
 Authenticator::Authenticator()
 {
-    api::chat::User *newUser;
-
-    newUser = _knownUsers.add_users();
-    newUser->set_name("user1");
-    newUser->set_password("qwerty");
-
-    newUser = _knownUsers.add_users();
-    newUser->set_name("user2");
-    newUser->set_password("qwerty");
-
-    newUser = _knownUsers.add_users();
-    newUser->set_name("user3");
-    newUser->set_password("qwerty");
-
-    newUser = _knownUsers.add_users();
-    newUser->set_name("user4");
-    newUser->set_password("qwerty");
-
-    newUser = _knownUsers.add_users();
-    newUser->set_name("user5");
-    newUser->set_password("qwerty");
+    api::chat::UserCredentials *newUser;
+    for (int i = 1; i < 10; ++i) {
+        newUser = _knownUsers.add_users();
+        newUser->set_name(std::string("user") + std::to_string(i));
+        newUser->set_password("qwerty");
+    }
 }
 
 Authenticator::~Authenticator()
