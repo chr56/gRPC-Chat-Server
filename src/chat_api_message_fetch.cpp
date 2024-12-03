@@ -29,9 +29,19 @@ public:
         std::cout << "User " << name.value() << " connected\n";
 
         // Update messages
+
+        uint64_t target_chat = _request->chat_id();
+        auto messages = _service->chatManager.get_messages_by_id(target_chat);
+
+        if (!messages) {
+            this->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, "Chat Not Found"));
+            delete this;
+            return;
+        }
+
         _writing = true;
-        std::cout << "Sending all messages to " << name.value() << "\n";
-        StartWrite(&(_service->_messages));
+        std::cout << "Sending Chat Messages(id: " << target_chat << ") to user " << name.value() << "\n";
+        StartWrite(messages.value());
     }
 
 

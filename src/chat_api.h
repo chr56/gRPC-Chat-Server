@@ -10,11 +10,12 @@
 #include "api_chat.grpc.pb.h"
 
 #include "authenticator.h"
+#include "chat_manager.h"
 
 
 class ChatApiService final : public api::chat::ChatService::CallbackService {
 public:
-    ChatApiService() : _messages(), _clients() {}
+    ChatApiService() : _clients() {}
 
     grpc::ServerUnaryReactor *
     Login(::grpc::CallbackServerContext *context, const ::api::chat::UserCredentials *credentials, ::api::chat::None *none) override;
@@ -37,7 +38,7 @@ private:
     void notifyClients(uint64_t dialogId, const api::chat::Message &message);
 
     Authenticator authenticator;
-    api::chat::MessageList _messages;
+    ChatManager chatManager;
     std::list<Client *> _clients;
 
     class MessageStreamReactor;

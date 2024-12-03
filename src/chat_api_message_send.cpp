@@ -17,12 +17,18 @@ ChatApiService::SendMessageTo(grpc::CallbackServerContext *context, const SendMe
         return reactor;
     }
 
+    // Check Messages
+    auto id = request->target();
+    auto messages = chatManager.get_messages_by_id(id);
+    if (!messages) {
+        reactor->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, "Chat Not Found"));
+        return reactor;
+    }
     //  Notify new messages to other clients
-    auto *msg = _messages.add_messages();
+    auto *msg = messages.value()->add_messages();
     msg->set_sender_user_name(*name);
     msg->set_sender_user_id(0);
     *msg = request->message();
-    uint64_t id = request->target();
     notifyClients(id, *msg);
 
     reactor->Finish(grpc::Status::OK);
