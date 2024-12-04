@@ -18,6 +18,10 @@ public:
 
     ~UserManager();
 
+
+    std::list<api::chat::User *>
+    list_all_users();
+
     std::optional<api::chat::User *>
     get_user_by_id(uint64_t id);
 

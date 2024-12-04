@@ -1,5 +1,42 @@
 #include "user_manager.h"
 
+using namespace api::chat;
+
+std::list<User *>
+UserManager::list_all_users() {
+    std::list<User *> users(_users.size());
+    for (const auto& pair : _users) {
+        auto user = pair.second;
+        users.push_back(&user);
+    }
+    return users;
+}
+
+
+std::optional<api::chat::User *>
+UserManager::get_user_by_id(uint64_t id) {
+    auto it = _users.find(id);
+    if (it != _users.end()) {
+        return &(it->second);
+    } else {
+        return std::nullopt;
+    }
+}
+
+std::optional<api::chat::User *>
+UserManager::get_user_by_name(std::string_view name) {
+    auto it = std::find_if(
+            _users.begin(), _users.end(),
+            [&name](const std::pair<uint64_t, api::chat::User> &user_pair) {
+                return user_pair.second.name() == name;  // Check if name matches
+            });
+    if (it != _users.end()) {
+        return &it->second;
+    } else {
+        return std::nullopt;
+    }
+}
+
 UserManager::UserManager() {
     using namespace api::chat;
     UserCredentials *credentials;
@@ -62,28 +99,4 @@ UserManager::check_user_credentials(UserManager::Metadata &metadata) {
     auto success = check_user_credentials(name, password);
 
     return success ? std::optional{name} : std::nullopt;
-}
-
-std::optional<api::chat::User *>
-UserManager::get_user_by_id(uint64_t id) {
-    auto it = _users.find(id);
-    if (it != _users.end()) {
-        return &(it->second);
-    } else {
-        return std::nullopt;
-    }
-}
-
-std::optional<api::chat::User *>
-UserManager::get_user_by_name(std::string_view name) {
-    auto it = std::find_if(
-            _users.begin(), _users.end(),
-            [&name](const std::pair<uint64_t, api::chat::User> &user_pair) {
-                return user_pair.second.name() == name;  // Check if name matches
-            });
-    if (it != _users.end()) {
-        return &it->second;
-    } else {
-        return std::nullopt;
-    }
 }
