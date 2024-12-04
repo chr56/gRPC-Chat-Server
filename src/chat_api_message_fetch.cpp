@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include "absl/strings/str_format.h"
+
 #include "chat_api.h"
 
 using namespace api::chat;
@@ -18,7 +20,7 @@ public:
         if (!name) {
             this->Finish(grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid credentials"));
             delete this;
-            std::cout << "Illegal user tried to login!\n";
+            absl::PrintF("Illegal user tried to login!\n");
             return;
         }
 
@@ -26,7 +28,7 @@ public:
         _username = *name;
         _connected = true;
         _service->_clients.push_back(this);
-        std::cout << "User " << name.value() << " connected to Chat(id: " << _request->chat_id() << ")\n";
+        absl::PrintF("User %s connected to Chat(id: %u)\n", name.value(), _request->chat_id());
 
         // Update messages
 
@@ -40,7 +42,7 @@ public:
         }
 
         _writing = true;
-        std::cout << "Sending Chat Messages(id: " << target_chat << ") to " << name.value() << "\n";
+        absl::PrintF("Sending Chat Messages(id: %u) to %s\n", target_chat, name.value());
         StartWrite(messages.value());
     }
 
@@ -49,25 +51,24 @@ public:
         if (!ok || !_connected) {
             _connected = false;
             _service->_clients.remove(this);
-            std::cout << "Error occurs! (" << "user: " << _username << ", ok: " << ok << ", connected: " << _connected << ")\n";
+            absl::PrintF("Error occurs! (user: %s, ok: %d, connected: %d)\n", _username.c_str(), ok, _connected);
             return;
         }
 
         // Prepare for the next write (if needed)
         if (!_pendingMessages.empty()) {
-            std::cout << "Sending updated messages to " << _username << "\n";
+            absl::PrintF("Sending updated messages to %s\n", _username.c_str());
             _writing = true;
             StartWrite(&(_pendingMessages.front()));
             _pendingMessages.pop_front();
         } else {
             _writing = false;
-            std::string msg("Completed to send messages to ");
-            std::cout << (msg + _username + "\n");
+            absl::PrintF("Completed to send messages to %s\n", _username.c_str());
         }
     }
 
     void OnDone() override {
-        std::cout << "User " << _username << " terminated from Chat(id: " << _request->chat_id() << ")\n";
+        absl::PrintF("User %s terminated from Chat(id: %u)\n", _username.c_str(), _request->chat_id());
         _connected = false;
         _service->_clients.remove(this);
         this->Finish(grpc::Status::OK);
@@ -75,7 +76,7 @@ public:
     }
 
     void OnCancel() override {
-        std::cout << "User " << _username << " disconnected from Chat(id: " << _request->chat_id() << ")\n";
+        absl::PrintF("User %s disconnected from Chat(id: %u)\n", _username.c_str(), _request->chat_id());
         _connected = false;
     }
 
@@ -89,10 +90,10 @@ public:
         *messages.add_messages() = message;
 
         if (_writing) {
-            std::cout << "Notify new message (chat " << chat_id << ") to " << _username << " (pending)" << "\n";
+            absl::PrintF("Notify new message (chat %u) to %s (pending)\n", chat_id, _username.c_str());
             _pendingMessages.push_back(messages);
         } else {
-            std::cout << "Notify new message (chat " << chat_id << ") to " << _username << "\n";
+            absl::PrintF("Notify new message (chat %u) to %s\n", chat_id, _username.c_str());
             _writing = true;
             StartWrite(&messages);
         }

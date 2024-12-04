@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include "absl/strings/str_format.h"
+
 #include "chat_api.h"
 
 using namespace api::chat;
@@ -22,12 +24,12 @@ public:
     }
 
     void OnDone() override {
-        std::cout << "Completed to send Chat list!\n";
+        absl::PrintF("Completed to send Chat list!\n");
         delete this;
     }
 
     void OnCancel() override {
-        std::cout << "Error when sending all chats\n";
+        absl::PrintF("Error when sending all chats\n");
         delete this;
     }
 
@@ -50,9 +52,7 @@ ChatApiService::FetchChatList(grpc::CallbackServerContext *context, const None *
         reactor->Finish(grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid credentials"));
         return reactor;
     }
-
-    std::string msg("Sending Chat list to user ");
-    std::cout << (msg + name.value() + "...\n");
+    absl::PrintF("Sending Chat list to %s \n", name.value());
 
     reactor = new ChatApiService::ChatListReactor(context, list, chatManager);
 
