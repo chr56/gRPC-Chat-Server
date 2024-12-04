@@ -45,6 +45,7 @@ private:
     std::list<Client *> _clients;
 
     class MessageStreamReactor;
+    class ChatListReactor;
 };
 
 
