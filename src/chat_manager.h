@@ -9,7 +9,7 @@
 class ChatManager {
 public:
 
-    std::list<api::chat::Chat *>
+    std::list<api::chat::Chat>
     list_all_chats();
 
     std::optional<api::chat::MessageList *>
@@ -17,9 +17,6 @@ public:
 
     std::optional<api::chat::Chat *>
     get_chat_by_id(uint64_t id);
-
-    std::optional<api::chat::ChatList *>
-    convert(const std::list<api::chat::Chat *>&);
 
     ChatManager();
 

@@ -9,13 +9,13 @@ public:
     ChatListReactor(
             grpc::CallbackServerContext *context, ChatList *reply, ChatManager chatManager
     ) : _context(context) {
-        const std::list<Chat *> &allChats = chatManager.list_all_chats();
-        for (const auto chat: allChats) {
+        const std::list<Chat> &allChats = chatManager.list_all_chats();
+        for (const auto& chat: allChats) {
             Chat *newChat = pending.add_chats();
-            newChat->set_id(chat->id());
-            newChat->set_name(chat->name());
-            newChat->set_is_group(chat->is_group());
-            newChat->set_description(chat->description());
+            newChat->set_id(chat.id());
+            newChat->set_name(chat.name());
+            newChat->set_is_group(chat.is_group());
+            newChat->set_description(chat.description());
         }
         reply->Swap(&pending);
         Finish(grpc::Status::OK);
