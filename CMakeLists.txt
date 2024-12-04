@@ -19,6 +19,7 @@ add_executable(chat_api_server
 
 target_link_libraries(
     chat_api_server
+    absl::str_format
     ${_GRPC_GRPCPP}
     ${_PROTOBUF_LIBPROTOBUF}
     grpc_proto_chat
