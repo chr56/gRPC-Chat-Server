@@ -26,7 +26,7 @@ public:
         _username = *name;
         _connected = true;
         _service->_clients.push_back(this);
-        std::cout << "User " << name.value() << " connected\n";
+        std::cout << "User " << name.value() << " connected to Chat(id: " << _request->chat_id() << ")\n";
 
         // Update messages
 
@@ -40,7 +40,7 @@ public:
         }
 
         _writing = true;
-        std::cout << "Sending Chat Messages(id: " << target_chat << ") to user " << name.value() << "\n";
+        std::cout << "Sending Chat Messages(id: " << target_chat << ") to " << name.value() << "\n";
         StartWrite(messages.value());
     }
 
@@ -67,7 +67,7 @@ public:
     }
 
     void OnDone() override {
-        std::cout << "User " << _username << " terminated!\n";
+        std::cout << "User " << _username << " terminated from Chat(id: " << _request->chat_id() << ")\n";
         _connected = false;
         _service->_clients.remove(this);
         this->Finish(grpc::Status::OK);
@@ -75,7 +75,7 @@ public:
     }
 
     void OnCancel() override {
-        std::cout << "User " << _username << " disconnected!\n";
+        std::cout << "User " << _username << " disconnected from Chat(id: " << _request->chat_id() << ")\n";
         _connected = false;
     }
 
@@ -89,10 +89,10 @@ public:
         *messages.add_messages() = message;
 
         if (_writing) {
-            std::cout << "Notify new message (chat " << chat_id << ") to user " << _username << " (pending)" << "\n";
+            std::cout << "Notify new message (chat " << chat_id << ") to " << _username << " (pending)" << "\n";
             _pendingMessages.push_back(messages);
         } else {
-            std::cout << "Notify new message (chat " << chat_id << ") to user " << _username << "\n";
+            std::cout << "Notify new message (chat " << chat_id << ") to " << _username << "\n";
             _writing = true;
             StartWrite(&messages);
         }
