@@ -23,6 +23,17 @@ std::optional<Chat *> ChatManager::get_chat_by_id(uint64_t id) {
 
 ChatManager::ChatManager() : _all_chats(), _all_messages() {
     setup_default_chat();
+
+
+    Chat test_chat;
+    test_chat.set_id(100);
+    test_chat.set_name("Test");
+    test_chat.set_is_group(true);
+    test_chat.set_description("Test");
+    _all_chats[100] = test_chat;
+
+    MessageList test_message_list;
+    _all_messages[100] = test_message_list;
 }
 
 void ChatManager::setup_default_chat() {
