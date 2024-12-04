@@ -68,3 +68,19 @@ void ChatManager::setup_default_chat() {
 
     _all_messages[0] = default_message_list;
 }
+
+std::optional<ChatList *>
+ChatManager::convert(const std::list<Chat *>& list) {
+    ChatList chatList;
+    for (const auto &chat: list) {
+        auto item = chatList.add_chats();
+        UserList members = chat->members();
+        item->set_id(chat->id());
+        item->set_name(chat->name());
+        item->set_is_group(chat->is_group());
+        item->set_allocated_members(&members);
+        item->set_description(chat->description());
+    }
+    return &chatList;
+}
+

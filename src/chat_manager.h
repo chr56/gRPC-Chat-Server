@@ -18,6 +18,9 @@ public:
     std::optional<api::chat::Chat *>
     get_chat_by_id(uint64_t id);
 
+    std::optional<api::chat::ChatList *>
+    convert(const std::list<api::chat::Chat *>&);
+
     ChatManager();
 
 private:
