@@ -20,6 +20,9 @@ public:
     grpc::ServerUnaryReactor *
     Login(::grpc::CallbackServerContext *context, const ::api::chat::UserCredentials *credentials, ::api::chat::None *none) override;
 
+    grpc::ServerUnaryReactor *
+    FetchChatList(::grpc::CallbackServerContext *context, const ::api::chat::None *none, ::api::chat::ChatList *list) override;
+
     grpc::ServerWriteReactor<api::chat::MessageList> *
     FetchMessageList(::grpc::CallbackServerContext *context, const ::api::chat::FetchMessageListRequest *request) override;
 

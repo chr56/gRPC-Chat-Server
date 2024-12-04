@@ -12,6 +12,7 @@ add_executable(chat_api_server
     src/server.cpp
     src/chat_manager.cpp
     src/chat_api_login.cpp
+    src/chat_api_chat_fetch.cpp
     src/chat_api_message_fetch.cpp
     src/chat_api_message_send.cpp
     src/user_manager.cpp)
