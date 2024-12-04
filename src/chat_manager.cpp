@@ -2,6 +2,16 @@
 
 using namespace api::chat;
 
+std::list<Chat *> ChatManager::list_all_chats() {
+    std::list<Chat *> chat_list(_all_chats.size());
+    for (const auto& pair : _all_chats) {
+        auto chat = pair.second;
+        chat_list.push_back(&chat);
+    }
+    return chat_list;
+}
+
+
 std::optional<MessageList *> ChatManager::get_messages_by_id(uint64_t id) {
     auto it = _all_messages.find(id);
     if (it != _all_messages.end()) {
