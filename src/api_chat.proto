@@ -17,6 +17,7 @@ message Message {
     ContentType type = 3;
     uint64 sender_user_id = 6;
     string sender_user_name = 7;
+    optional string file_name = 11;
 }
 
 message MessageList {
