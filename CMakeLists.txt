@@ -29,7 +29,7 @@ set(CPP_HEADER
 
 ####################################################################
 
-add_executable(chat_api_server
+add_executable(chat_server
     src/server.cpp
     src/api/chat_api.h
     src/api/chat_api_login.cpp
@@ -45,7 +45,7 @@ add_executable(chat_api_server
     )
 
 target_link_libraries(
-    chat_api_server
+    chat_server
     absl::str_format
     ${_GRPC_GRPCPP}
     ${_PROTOBUF_LIBPROTOBUF}
