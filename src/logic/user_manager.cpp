@@ -37,6 +37,10 @@ UserManager::get_user_by_name(std::string_view name) {
     }
 }
 
+bool UserManager::set_user_relationship(uint64_t user_id, uint64_t friend_id, bool is_friend) {
+    return false; // todo
+}
+
 UserManager::UserManager(const Database& database): db(database) {
     using namespace api::chat;
     UserCredentials *credentials;

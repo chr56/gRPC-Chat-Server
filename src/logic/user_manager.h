@@ -29,6 +29,8 @@ public:
     std::optional<api::chat::User *>
     get_user_by_name(std::string_view name);
 
+    bool set_user_relationship(uint64_t user_id, uint64_t friend_id, bool is_friend);
+
     //region
     typedef std::multimap<grpc::string_ref, grpc::string_ref> Metadata;
 

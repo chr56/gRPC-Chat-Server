@@ -32,7 +32,26 @@ ChatApiService::ManageFriend(::grpc::CallbackServerContext *context, const Frien
         return reactor;
     }
 
-    reactor->Finish(grpc::Status(grpc::StatusCode::UNIMPLEMENTED, ""));
+    auto action = operation->action();
+    uint64_t user_id = operation->user_id();
+    uint64_t friend_id = operation->friend_id();
+    switch (action) {
+        case FriendManageOperation::ActionType::FriendManageOperation_ActionType_Add:
+            userManager.set_user_relationship(user_id, friend_id, true);
+            reactor->Finish(grpc::Status::OK);
+            return reactor;
+            break;
+        case FriendManageOperation::ActionType::FriendManageOperation_ActionType_Remove:
+            userManager.set_user_relationship(user_id, friend_id, false);
+            reactor->Finish(grpc::Status::OK);
+            return reactor;
+            break;
+        default:
+            break;
+    }
+
+
+    reactor->Finish(grpc::Status(grpc::StatusCode::INTERNAL, ""));
     return reactor;
 }
 
