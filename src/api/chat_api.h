@@ -45,6 +45,13 @@ public:
     ManageGroupMember(::grpc::CallbackServerContext *context, const ::api::chat::GroupMemberManageOperation *operation,
                       ::api::chat::None *none) override;
 
+
+    grpc::ServerUnaryReactor *
+    FetchFriendList(::grpc::CallbackServerContext *context, const ::api::chat::None *none, ::api::chat::UserList *list) override;
+
+    grpc::ServerUnaryReactor *ManageFriend(::grpc::CallbackServerContext *context, const ::api::chat::FriendManageOperation *operation,
+                                           ::api::chat::None *none) override;
+
 private:
 
     class Client {
