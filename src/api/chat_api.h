@@ -25,7 +25,7 @@ public:
     grpc::ServerUnaryReactor *
     Login(
             grpc::CallbackServerContext *context,
-            const api::chat::UserCredentials *credentials, api::chat::None *none
+            const api::chat::UserCredentials *credentials, api::chat::LoginResult *result
     ) override;
 
     grpc::ServerUnaryReactor *

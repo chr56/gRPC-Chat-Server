@@ -23,6 +23,7 @@ message Message {
 }
 message MessageList {
     repeated Message messages = 1;
+    optional uint64 chat_id = 7;
 }
 
 message User {
@@ -57,6 +58,9 @@ message ChatList {
 
 /////////////////////////
 
+message LoginResult {
+    uint64 user_id = 1;
+}
 
 message FetchMessageListRequest {
     uint64 chat_id = 1;
@@ -106,7 +110,7 @@ message FriendManageOperation {
 
 service ChatService {
 
-    rpc Login(UserCredentials) returns (None) {}
+    rpc Login(UserCredentials) returns (LoginResult) {}
 
     rpc FetchChatList(None) returns (ChatList) {}
     rpc FetchMessageList(FetchMessageListRequest) returns (stream MessageList) {}
