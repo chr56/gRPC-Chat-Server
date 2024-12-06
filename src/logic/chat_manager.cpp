@@ -4,7 +4,7 @@ using namespace api::chat;
 
 std::list<Chat> ChatManager::list_all_chats() {
     std::list<Chat> chat_list;
-    for (const auto& pair : _all_chats) {
+    for (const auto &pair: _all_chats) {
         auto chat = pair.second;
         chat_list.push_back(chat);
     }
@@ -31,46 +31,61 @@ std::optional<MessageList *> ChatManager::get_messages_by_id(uint64_t id) {
     }
 }
 
+uint64_t current_id = 0;
+
+uint64_t ChatManager::create_chat_and_messages(std::string name, std::string description, bool is_group) {
+    uint64_t id = current_id++;
+
+    Chat test_chat;
+    test_chat.set_id(id);
+    test_chat.set_name(name);
+    test_chat.set_is_group(is_group);
+    test_chat.set_description(description);
+    _all_chats[id] = test_chat;
+
+    MessageList test_message_list;
+    _all_messages[id] = test_message_list;
+
+    return id;
+}
 
 
-ChatManager::ChatManager(const Database& database) : db(database), _all_chats(), _all_messages() {
+bool ChatManager::delete_chat(uint64_t id) {
+    _all_messages.erase(id);
+    _all_chats.erase(id);
+    return true;
+}
+
+
+ChatManager::ChatManager(const Database &database) : db(database), _all_chats(), _all_messages() {
     setup_default_chat();
 
 }
 
+void ChatManager::append_message(uint64_t chat_id,
+                                 uint64_t timestamp,
+                                 uint64_t user_id,
+                                 std::string user_name,
+                                 std::string content) const {
+    Message message;
+    message.set_timestamp(timestamp);
+    message.set_content(content);
+    message.set_type(Message::Text);
+    message.set_sender_user_id(user_id);
+    message.set_sender_user_name(user_name);
+
+    auto list = _all_messages.at(chat_id);
+    Message *p = list.add_messages();
+    *p = message;
+}
+
 void ChatManager::setup_default_chat() {
+    uint64_t id;
 
     // Default Chat
-    Chat default_chat;
-    default_chat.set_id(0);
-    default_chat.set_name("Public");
-    default_chat.set_is_group(true);
-    default_chat.set_description("Default chat");
-
-    _all_chats[0] = default_chat;
-
-    MessageList default_message_list;
-
-    Message default_message;
-    default_message.set_timestamp(0);
-    default_message.set_content("Welcome to Default chat");
-    default_message.set_type(Message::Text);
-    default_message.set_sender_user_id(0);
-    default_message.set_sender_user_name("System");
-
-    *default_message_list.add_messages() = default_message;
-
-    _all_messages[0] = default_message_list;
-
+    id = create_chat_and_messages("Public", "Default Chat", true);
+    append_message(id, 0, 0, "System", "Welcome to Default chat");
 
     // Test Chat
-    Chat test_chat;
-    test_chat.set_id(100);
-    test_chat.set_name("Test");
-    test_chat.set_is_group(true);
-    test_chat.set_description("Test");
-    _all_chats[100] = test_chat;
-
-    MessageList test_message_list;
-    _all_messages[100] = test_message_list;
+    create_chat_and_messages("Test1", "Test Chat", true);
 }
