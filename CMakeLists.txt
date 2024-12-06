@@ -6,15 +6,15 @@ set(CMAKE_CXX_STANDARD 17)
 include(cmake/find_grpc.cmake)
 include(cmake/compile_grpc_proto.cmake)
 
-compile_grpc_proto(grpc_proto_chat api_chat "src/api_chat.proto")
+compile_grpc_proto(grpc_proto_chat api_chat "src/api/api_chat.proto")
 
 add_executable(chat_api_server
     src/server.cpp
     src/chat_manager.cpp
-    src/chat_api_login.cpp
-    src/chat_api_chat_fetch.cpp
-    src/chat_api_message_fetch.cpp
-    src/chat_api_message_send.cpp
+    src/api/chat_api_login.cpp
+    src/api/chat_api_chat_fetch.cpp
+    src/api/chat_api_message_fetch.cpp
+    src/api/chat_api_message_send.cpp
     src/user_manager.cpp)
 
 target_link_libraries(
