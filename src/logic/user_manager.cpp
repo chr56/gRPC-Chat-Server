@@ -37,7 +37,7 @@ UserManager::get_user_by_name(std::string_view name) {
     }
 }
 
-UserManager::UserManager() {
+UserManager::UserManager(const Database& database): db(database) {
     using namespace api::chat;
     UserCredentials *credentials;
     for (int i = 1; i < 10; ++i) {

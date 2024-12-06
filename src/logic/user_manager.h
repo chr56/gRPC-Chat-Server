@@ -9,12 +9,13 @@
 #include <grpc++/grpc++.h>
 
 #include "api_chat.pb.h"
-#include "api_chat.grpc.pb.h"
+
+#include "../database/database.h"
 
 class UserManager {
 public:
 
-    UserManager();
+    UserManager(const Database &database);
 
     ~UserManager();
 
@@ -41,6 +42,8 @@ public:
 private:
     api::chat::UserCredentialsList _userCredentials;
     std::map<uint64_t, api::chat::User> _users; // user_id <-> User
+
+    Database db;
 };
 
 

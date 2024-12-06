@@ -33,7 +33,7 @@ std::optional<MessageList *> ChatManager::get_messages_by_id(uint64_t id) {
 
 
 
-ChatManager::ChatManager() : _all_chats(), _all_messages() {
+ChatManager::ChatManager(const Database& database) : db(database), _all_chats(), _all_messages() {
     setup_default_chat();
 
 }

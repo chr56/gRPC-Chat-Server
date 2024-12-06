@@ -17,7 +17,10 @@
 
 class ChatApiService final : public api::chat::ChatService::CallbackService {
 public:
-    explicit ChatApiService(const Database& database) : _clients(), db(database) {}
+    explicit ChatApiService(const Database &database) :
+            db(database),
+            userManager(database), chatManager(database),
+            _clients() {}
 
     grpc::ServerUnaryReactor *
     Login(::grpc::CallbackServerContext *context, const ::api::chat::UserCredentials *credentials, ::api::chat::None *none) override;
@@ -48,6 +51,7 @@ private:
     std::list<Client *> _clients;
 
     class MessageStreamReactor;
+
     class ChatListReactor;
 };
 
