@@ -40,6 +40,8 @@ add_executable(chat_api_server
     src/logic/chat_manager.cpp
     src/logic/user_manager.h
     src/logic/user_manager.cpp
+    src/database/database.h
+    src/database/database.cpp
     )
 
 target_link_libraries(
