@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.21)
 project(gRPC-Chat-Server C CXX)
 set(CMAKE_CXX_STANDARD 17)
 
+find_package(mysql-concpp REQUIRED)
+
 include(cmake/find_grpc.cmake)
 include(cmake/compile_grpc_proto.cmake)
 
@@ -48,3 +50,9 @@ target_link_libraries(
 
 
 ####################################################################
+
+
+
+
+add_executable(db src/db.cpp)
+target_link_libraries(db mysql::concpp)
