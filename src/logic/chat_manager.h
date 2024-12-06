@@ -12,11 +12,11 @@ public:
     std::list<api::chat::Chat>
     list_all_chats();
 
-    std::optional<api::chat::MessageList *>
-    get_messages_by_id(uint64_t id);
-
     std::optional<api::chat::Chat *>
     get_chat_by_id(uint64_t id);
+
+    std::optional<api::chat::MessageList *>
+    get_messages_by_id(uint64_t id);
 
     ChatManager();
 

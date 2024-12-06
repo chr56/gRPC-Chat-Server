@@ -12,15 +12,6 @@ std::list<Chat> ChatManager::list_all_chats() {
 }
 
 
-std::optional<MessageList *> ChatManager::get_messages_by_id(uint64_t id) {
-    auto it = _all_messages.find(id);
-    if (it != _all_messages.end()) {
-        return &(it->second);
-    } else {
-        return std::nullopt;
-    }
-}
-
 std::optional<Chat *> ChatManager::get_chat_by_id(uint64_t id) {
     auto it = _all_chats.find(id);
     if (it != _all_chats.end()) {
@@ -31,22 +22,25 @@ std::optional<Chat *> ChatManager::get_chat_by_id(uint64_t id) {
 }
 
 
+std::optional<MessageList *> ChatManager::get_messages_by_id(uint64_t id) {
+    auto it = _all_messages.find(id);
+    if (it != _all_messages.end()) {
+        return &(it->second);
+    } else {
+        return std::nullopt;
+    }
+}
+
+
+
 ChatManager::ChatManager() : _all_chats(), _all_messages() {
     setup_default_chat();
 
-
-    Chat test_chat;
-    test_chat.set_id(100);
-    test_chat.set_name("Test");
-    test_chat.set_is_group(true);
-    test_chat.set_description("Test");
-    _all_chats[100] = test_chat;
-
-    MessageList test_message_list;
-    _all_messages[100] = test_message_list;
 }
 
 void ChatManager::setup_default_chat() {
+
+    // Default Chat
     Chat default_chat;
     default_chat.set_id(0);
     default_chat.set_name("Public");
@@ -67,4 +61,16 @@ void ChatManager::setup_default_chat() {
     *default_message_list.add_messages() = default_message;
 
     _all_messages[0] = default_message_list;
+
+
+    // Test Chat
+    Chat test_chat;
+    test_chat.set_id(100);
+    test_chat.set_name("Test");
+    test_chat.set_is_group(true);
+    test_chat.set_description("Test");
+    _all_chats[100] = test_chat;
+
+    MessageList test_message_list;
+    _all_messages[100] = test_message_list;
 }
