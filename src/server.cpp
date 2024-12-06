@@ -1,7 +1,7 @@
 #include "api/chat_api.h"
 #include "database/database.h"
 
-std::string server_address("localhost:65002");
+std::string server_address("localhost:6666");
 
 void RunServer(Database &database) {
     ChatApiService service(database);
