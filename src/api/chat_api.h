@@ -9,8 +9,8 @@
 #include "api_chat.pb.h"
 #include "api_chat.grpc.pb.h"
 
-#include "../chat_manager.h"
-#include "../user_manager.h"
+#include "../logic/chat_manager.h"
+#include "../logic/user_manager.h"
 
 
 class ChatApiService final : public api::chat::ChatService::CallbackService {

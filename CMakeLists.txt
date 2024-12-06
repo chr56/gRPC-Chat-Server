@@ -10,12 +10,13 @@ compile_grpc_proto(grpc_proto_chat api_chat "src/api/api_chat.proto")
 
 add_executable(chat_api_server
     src/server.cpp
-    src/chat_manager.cpp
     src/api/chat_api_login.cpp
     src/api/chat_api_chat_fetch.cpp
     src/api/chat_api_message_fetch.cpp
     src/api/chat_api_message_send.cpp
-    src/user_manager.cpp)
+    src/logic/chat_manager.cpp
+    src/logic/user_manager.cpp
+    )
 
 target_link_libraries(
     chat_api_server
