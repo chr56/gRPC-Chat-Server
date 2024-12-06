@@ -23,34 +23,60 @@ public:
             _clients() {}
 
     grpc::ServerUnaryReactor *
-    Login(::grpc::CallbackServerContext *context, const ::api::chat::UserCredentials *credentials, ::api::chat::None *none) override;
+    Login(
+            grpc::CallbackServerContext *context,
+            const api::chat::UserCredentials *credentials, api::chat::None *none
+    ) override;
 
     grpc::ServerUnaryReactor *
-    FetchChatList(::grpc::CallbackServerContext *context, const ::api::chat::None *none, ::api::chat::ChatList *list) override;
+    FetchChatList(
+            grpc::CallbackServerContext *context,
+            const api::chat::None *none, api::chat::ChatList *list
+    ) override;
 
     grpc::ServerWriteReactor<api::chat::MessageList> *
-    FetchMessageList(::grpc::CallbackServerContext *context, const ::api::chat::FetchMessageListRequest *request) override;
+    FetchMessageList(
+            grpc::CallbackServerContext *context,
+            const api::chat::FetchMessageListRequest *request
+    ) override;
 
     grpc::ServerUnaryReactor *
-    SendMessageTo(::grpc::CallbackServerContext *context, const ::api::chat::SendMessageRequest *request, ::api::chat::None *none) override;
+    SendMessageTo(
+            grpc::CallbackServerContext *context,
+            const api::chat::SendMessageRequest *request, api::chat::None *none
+    ) override;
 
     grpc::ServerUnaryReactor *
-    CreateChat(::grpc::CallbackServerContext *context, const ::api::chat::CreateChatRequest *request, ::api::chat::None *none) override;
+    CreateChat(
+            grpc::CallbackServerContext *context,
+            const api::chat::CreateChatRequest *request, api::chat::None *none
+    ) override;
 
     grpc::ServerUnaryReactor *
-    DeleteChat(::grpc::CallbackServerContext *context, const ::api::chat::DeleteChatRequest *request, ::api::chat::None *none) override;
+    DeleteChat(
+            grpc::CallbackServerContext *context,
+            const api::chat::DeleteChatRequest *request, api::chat::None *none
+    ) override;
 
 
     grpc::ServerUnaryReactor *
-    ManageGroupMember(::grpc::CallbackServerContext *context, const ::api::chat::GroupMemberManageOperation *operation,
-                      ::api::chat::None *none) override;
+    ManageGroupMember(
+            grpc::CallbackServerContext *context,
+            const api::chat::GroupMemberManageOperation *operation, api::chat::None *none
+    ) override;
 
 
     grpc::ServerUnaryReactor *
-    FetchFriendList(::grpc::CallbackServerContext *context, const ::api::chat::None *none, ::api::chat::UserList *list) override;
+    FetchFriendList(
+            grpc::CallbackServerContext *context,
+            const api::chat::None *none, api::chat::UserList *list
+    ) override;
 
-    grpc::ServerUnaryReactor *ManageFriend(::grpc::CallbackServerContext *context, const ::api::chat::FriendManageOperation *operation,
-                                           ::api::chat::None *none) override;
+    grpc::ServerUnaryReactor *
+    ManageFriend(
+            grpc::CallbackServerContext *context,
+            const api::chat::FriendManageOperation *operation, api::chat::None *none
+    ) override;
 
 private:
 
