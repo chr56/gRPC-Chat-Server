@@ -17,7 +17,10 @@ ChatApiService::CreateChat(grpc::CallbackServerContext *context, const CreateCha
         return reactor;
     }
 
-    reactor->Finish(grpc::Status(grpc::StatusCode::UNIMPLEMENTED, ""));
+
+    chatManager.create_chat_and_messages(request->name(), request->description(), true);
+
+    reactor->Finish(grpc::Status::OK);
     return reactor;
 }
 
@@ -34,7 +37,11 @@ ChatApiService::DeleteChat(grpc::CallbackServerContext *context, const DeleteCha
         return reactor;
     }
 
-    reactor->Finish(grpc::Status(grpc::StatusCode::UNIMPLEMENTED, ""));
+    if (chatManager.delete_chat(request->target_chat_id())) {
+        reactor->Finish(grpc::Status::OK);
+    } else {
+        reactor->Finish(grpc::Status(grpc::StatusCode::INTERNAL, "Failed!"));
+    }
     return reactor;
 }
 
