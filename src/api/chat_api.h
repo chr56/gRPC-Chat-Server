@@ -9,13 +9,15 @@
 #include "api_chat.pb.h"
 #include "api_chat.grpc.pb.h"
 
+#include "../database/database.h"
+
 #include "../logic/chat_manager.h"
 #include "../logic/user_manager.h"
 
 
 class ChatApiService final : public api::chat::ChatService::CallbackService {
 public:
-    ChatApiService() : _clients() {}
+    explicit ChatApiService(const Database& database) : _clients(), db(database) {}
 
     grpc::ServerUnaryReactor *
     Login(::grpc::CallbackServerContext *context, const ::api::chat::UserCredentials *credentials, ::api::chat::None *none) override;
@@ -40,6 +42,7 @@ private:
 
     void notifyClients(uint64_t chat_id, const api::chat::Message &message);
 
+    Database db;
     UserManager userManager;
     ChatManager chatManager;
     std::list<Client *> _clients;

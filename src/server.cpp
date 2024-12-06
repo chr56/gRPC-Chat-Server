@@ -1,9 +1,10 @@
 #include "api/chat_api.h"
+#include "database/database.h"
 
 std::string server_address("localhost:65002");
 
-void RunServer() {
-    ChatApiService service;
+void RunServer(Database &database) {
+    ChatApiService service(database);
 
     grpc::ServerBuilder builder;
     builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
@@ -16,6 +17,7 @@ void RunServer() {
 }
 
 int main(int argc, char **argv) {
-    RunServer();
+    Database db;
+    RunServer(db);
     return 0;
 }
