@@ -34,7 +34,16 @@ public:
     grpc::ServerUnaryReactor *
     SendMessageTo(::grpc::CallbackServerContext *context, const ::api::chat::SendMessageRequest *request, ::api::chat::None *none) override;
 
+    grpc::ServerUnaryReactor *
+    CreateChat(::grpc::CallbackServerContext *context, const ::api::chat::CreateChatRequest *request, ::api::chat::None *none) override;
 
+    grpc::ServerUnaryReactor *
+    DeleteChat(::grpc::CallbackServerContext *context, const ::api::chat::DeleteChatRequest *request, ::api::chat::None *none) override;
+
+
+    grpc::ServerUnaryReactor *
+    ManageGroupMember(::grpc::CallbackServerContext *context, const ::api::chat::GroupMemberManageOperation *operation,
+                      ::api::chat::None *none) override;
 
 private:
 

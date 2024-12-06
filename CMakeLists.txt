@@ -34,6 +34,7 @@ add_executable(chat_server
     src/api/chat_api.h
     src/api/chat_api_login.cpp
     src/api/chat_api_chat_fetch.cpp
+    src/api/chat_api_chat_manage.cpp
     src/api/chat_api_message_fetch.cpp
     src/api/chat_api_message_send.cpp
     src/logic/chat_manager.h
