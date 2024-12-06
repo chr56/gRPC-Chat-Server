@@ -63,4 +63,9 @@ target_link_libraries(
 
 
 add_executable(db src/db.cpp)
+
+set(ENABLE_MYSQL ON)
+add_definitions(-DORMPP_ENABLE_MYSQL)
+include(ormpp/ormpp.cmake)
+
 target_link_libraries(db mysql::concpp)

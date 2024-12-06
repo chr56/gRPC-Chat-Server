@@ -1,0 +1,16 @@
+cmake_minimum_required(VERSION 3.15)
+
+if (ENABLE_PG)
+    include_directories(${PGSQL_INCLUDE_DIR} ormpp)
+elseif(ENABLE_MYSQL)
+    include_directories(${MYSQL_INCLUDE_DIR} ormpp)
+elseif(ENABLE_MARIADB)
+    include_directories(${MARIADB_INCLUDE_DIR} ormpp)
+elseif(ENABLE_SQLITE3)
+    add_subdirectory(thirdparty)
+    include_directories(ormpp)
+else()
+    message("Could not find database platform")
+endif()
+
+include_directories(.)
