@@ -15,7 +15,17 @@ ChatApiService::FetchFriendList(grpc::CallbackServerContext *context, const None
         return reactor;
     }
 
-    reactor->Finish(grpc::Status(grpc::StatusCode::UNIMPLEMENTED, ""));
+    const auto &all_users = userManager.list_all_users();
+    absl::PrintF("Sending friends list to %s \n", name.value());
+    for (auto item: all_users) { // todo
+        User *user = list->add_users();
+        user->set_id(item->id());
+        user->set_name(item->name());
+        user->set_description(item->description());
+    }
+
+    reactor->Finish(grpc::Status::OK);
+    absl::PrintF("Completed to send friends list to %s \n", name.value());
     return reactor;
 }
 
