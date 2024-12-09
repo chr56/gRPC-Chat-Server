@@ -23,6 +23,9 @@ public:
     std::list<api::chat::User *>
     list_all_users();
 
+    std::list<api::chat::User *>
+    get_friends(uint64_t user_id);
+
     std::optional<api::chat::User *>
     get_user_by_id(uint64_t id);
 

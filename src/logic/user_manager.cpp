@@ -53,6 +53,11 @@ UserManager::register_user(const std::string &name, const std::string &password)
 }
 
 
+std::list<api::chat::User *>
+UserManager::get_friends(uint64_t user_id) {
+    return list_all_users();  // todo
+}
+
 bool UserManager::set_user_relationship(uint64_t user_id, uint64_t friend_id, bool is_friend) {
     return false; // todo
 }
