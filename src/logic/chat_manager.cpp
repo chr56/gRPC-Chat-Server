@@ -114,6 +114,8 @@ bool ChatManager::add_members(uint64_t chat_id, api::chat::User *user) {
     User *newMember = chat.value()->mutable_members()->add_users();
     newMember->set_id(user->id());
     newMember->set_name(user->name());
+
+    return true;
 }
 
 
