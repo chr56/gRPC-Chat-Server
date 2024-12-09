@@ -4,10 +4,13 @@ using namespace api::chat;
 
 std::list<User *>
 UserManager::list_all_users() {
-    std::list<User *> users(_users.size());
+    std::list<User *> users;
     for (const auto &pair: _users) {
-        auto user = pair.second;
-        users.push_back(&user);
+        User *user = new User();
+        user->set_name(pair.second.name());
+        user->set_description(pair.second.description());
+        user->set_id(pair.second.id());
+        users.push_back(user);
     }
     return users;
 }
