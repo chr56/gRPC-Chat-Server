@@ -31,11 +31,14 @@ public:
 
     bool set_user_relationship(uint64_t user_id, uint64_t friend_id, bool is_friend);
 
+    std::optional<api::chat::User *>
+    register_user(const std::string &name, const std::string &password);
+
     //region
     typedef std::multimap<grpc::string_ref, grpc::string_ref> Metadata;
 
     bool check_user_credentials(std::string &name, std::string &password);
-    bool check_user_credentials(api::chat::UserCredentials& credentials);
+    bool check_user_credentials(api::chat::UserCredentials &credentials);
 
     std::optional<std::string> check_user_credentials(Metadata &metadata);
     //endregion
@@ -44,6 +47,7 @@ public:
 private:
     api::chat::UserCredentialsList _userCredentials;
     std::map<uint64_t, api::chat::User> _users; // user_id <-> User
+    api::chat::User add_user(int id, const std::string &username, const std::string &password, const std::string &description);
 
     Database db;
 };

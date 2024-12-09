@@ -5,7 +5,7 @@ using namespace api::chat;
 std::list<User *>
 UserManager::list_all_users() {
     std::list<User *> users(_users.size());
-    for (const auto& pair : _users) {
+    for (const auto &pair: _users) {
         auto user = pair.second;
         users.push_back(&user);
     }
@@ -37,28 +37,47 @@ UserManager::get_user_by_name(std::string_view name) {
     }
 }
 
+int user_id = 101;
+
+std::optional<api::chat::User *>
+UserManager::register_user(const std::string &name, const std::string &password) {
+    if (get_user_by_name(name).has_value()) {
+        return std::nullopt; // existed
+    } else {
+        User user = add_user(user_id++, name, password, name);
+        return std::optional{&user};
+    }
+}
+
+
 bool UserManager::set_user_relationship(uint64_t user_id, uint64_t friend_id, bool is_friend) {
     return false; // todo
 }
 
-UserManager::UserManager(const Database& database): db(database) {
+UserManager::UserManager(const Database &database) : db(database) {
     using namespace api::chat;
-    UserCredentials *credentials;
     for (int i = 1; i < 10; ++i) {
         auto username = std::string("user") + std::to_string(i);
-
-        credentials = _userCredentials.add_users();
-        credentials->set_id(i);
-        credentials->set_name(username);
-        credentials->set_password("qwerty");
-
-        User user;
-        user.set_id(i);
-        user.set_name(username);
-        user.set_description("Test user");
-
-        _users[i] = user;
+        auto description = std::string("Test user");
+        auto password = std::string("qwerty");
+        add_user(i, username, password, description);
     }
+}
+
+User UserManager::add_user(int id, const std::string &username, const std::string &password, const std::string &description) {
+    UserCredentials *credentials = _userCredentials.add_users();
+    credentials->set_id(id);
+    credentials->set_name(username);
+    credentials->set_password(password);
+
+    User user;
+    user.set_id(id);
+    user.set_name(username);
+    user.set_description(description);
+
+    _users[id] = user;
+
+    return user;
 }
 
 UserManager::~UserManager() {
