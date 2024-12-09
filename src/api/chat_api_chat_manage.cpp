@@ -58,7 +58,36 @@ ChatApiService::ManageGroupMember(grpc::CallbackServerContext *context, const Gr
         return reactor;
     }
 
-    reactor->Finish(grpc::Status(grpc::StatusCode::UNIMPLEMENTED, ""));
+    // Chat
+    uint64_t chat_id = operation->target_chat_id();
+    const auto &founded_chat = chatManager.get_chat_by_id(chat_id);
+    if (!founded_chat) {
+        reactor->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, absl::StrFormat("Chat %ul not found!", chat_id)));
+        return reactor;
+    }
+
+    // Member
+    uint64_t user_id = operation->target_user_id();
+    const auto &founded_member = userManager.get_user_by_id(user_id);
+    if (!founded_member) {
+        reactor->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, absl::StrFormat("User %ul not found!", user_id)));
+        return reactor;
+    }
+
+    // Action
+    Chat *chat = founded_chat.value();
+    User *member = founded_member.value();
+    GroupMemberManageOperation::ActionType action = operation->action();
+    if (action == GroupMemberManageOperation::AddUser) {
+        User *newMember = chat->mutable_members()->add_users();
+        newMember->set_id(member->id());
+        newMember->set_name(member->name());
+    } else {
+        UserList *members = chat->mutable_members();
+        reactor->Finish(grpc::Status(grpc::StatusCode::UNIMPLEMENTED, ""));
+    }
+
+    reactor->Finish(grpc::Status::OK);
     return reactor;
 }
 
