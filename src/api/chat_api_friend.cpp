@@ -8,24 +8,24 @@ ChatApiService::FetchFriendList(grpc::CallbackServerContext *context, const None
 
     // Authenticate user
     auto metadata = context->client_metadata();
-    auto name = userManager.check_user_credentials(metadata);
-    if (!name) {
+    auto user = userManager.check_user_credentials(metadata);
+    if (!user) {
         absl::PrintF("Illegal user tried to login!\n");
         reactor->Finish(grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid credentials"));
         return reactor;
     }
 
     const auto &all_users = userManager.list_all_users();
-    absl::PrintF("Sending friends list to %s \n", name.value());
+    absl::PrintF("Sending friends list to %s \n", user.value()->name());
     for (auto item: all_users) { // todo
-        User *user = list->add_users();
-        user->set_id(item->id());
-        user->set_name(item->name());
-        user->set_description(item->description());
+        User *u = list->add_users();
+        u->set_id(item->id());
+        u->set_name(item->name());
+        u->set_description(item->description());
     }
 
     reactor->Finish(grpc::Status::OK);
-    absl::PrintF("Completed to send friends list to %s \n", name.value());
+    absl::PrintF("Completed to send friends list to %s \n", user.value()->name());
     return reactor;
 }
 
@@ -35,8 +35,8 @@ ChatApiService::ManageFriend(::grpc::CallbackServerContext *context, const Frien
 
     // Authenticate user
     auto metadata = context->client_metadata();
-    auto name = userManager.check_user_credentials(metadata);
-    if (!name) {
+    auto user = userManager.check_user_credentials(metadata);
+    if (!user) {
         absl::PrintF("Illegal user tried to login!\n");
         reactor->Finish(grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid credentials"));
         return reactor;

@@ -16,8 +16,8 @@ public:
 
         // Authenticate user
         auto metadata = _context->client_metadata();
-        auto name = _service->userManager.check_user_credentials(metadata);
-        if (!name) {
+        auto user = _service->userManager.check_user_credentials(metadata);
+        if (!user) {
             this->Finish(grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid credentials"));
             delete this;
             absl::PrintF("Illegal user tried to login!\n");
@@ -25,10 +25,11 @@ public:
         }
 
         // Register user
-        _username = *name;
+        _username = user.value()->name();
+        _id = user.value()->id();
         _connected = true;
         _service->_clients.push_back(this);
-        absl::PrintF("User %s connected to Chat(id: %u)\n", name.value(), _request->chat_id());
+        absl::PrintF("User %s connected to Chat(id: %u)\n", _username, _request->chat_id());
 
         // Update messages
 
@@ -42,7 +43,7 @@ public:
         }
 
         _writing = true;
-        absl::PrintF("Sending Chat Messages(id: %u) to %s\n", target_chat, name.value());
+        absl::PrintF("Sending Chat Messages(id: %u) to %s\n", target_chat, _username);
         StartWrite(messages.value());
     }
 
@@ -106,6 +107,7 @@ private:
     const FetchMessageListRequest *_request;
 
     std::string _username;
+    uint64_t _id;
 
     bool _connected = false;
     bool _writing = false;

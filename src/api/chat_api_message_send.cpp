@@ -11,8 +11,8 @@ ChatApiService::SendMessageTo(grpc::CallbackServerContext *context, const SendMe
 
     // Authenticate user
     auto metadata = context->client_metadata();
-    auto name = userManager.check_user_credentials(metadata);
-    if (!name) {
+    auto user = userManager.check_user_credentials(metadata);
+    if (!user) {
         reactor->Finish(grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid credentials"));
         return reactor;
     }
@@ -26,7 +26,7 @@ ChatApiService::SendMessageTo(grpc::CallbackServerContext *context, const SendMe
     }
     //  Notify new messages to other clients
     auto *msg = messages.value()->add_messages();
-    msg->set_sender_user_name(*name);
+    msg->set_sender_user_name(user.value()->name());
     msg->set_sender_user_id(0);
     *msg = request->message();
     notifyClients(id, *msg);

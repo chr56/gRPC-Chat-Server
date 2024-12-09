@@ -54,13 +54,13 @@ ChatApiService::FetchChatList(grpc::CallbackServerContext *context, const None *
 
     // Authenticate user
     auto metadata = context->client_metadata();
-    auto name = userManager.check_user_credentials(metadata);
-    if (!name) {
+    auto user = userManager.check_user_credentials(metadata);
+    if (!user) {
         reactor = context->DefaultReactor();
         reactor->Finish(grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid credentials"));
         return reactor;
     }
-    absl::PrintF("Sending Chat list to %s \n", name.value());
+    absl::PrintF("Sending Chat list to %s \n", user.value()->name());
 
     reactor = new ChatApiService::ChatListReactor(context, list, chatManager, userManager);
 

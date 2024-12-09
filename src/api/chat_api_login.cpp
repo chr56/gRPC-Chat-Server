@@ -12,21 +12,14 @@ ChatApiService::Login(grpc::CallbackServerContext *context, const UserCredential
 
     // Authenticate user
     auto metadata = context->client_metadata();
-    auto name = userManager.check_user_credentials(metadata);
-    if (!name) {
+    auto user = userManager.check_user_credentials(metadata);
+    if (!user) {
         absl::PrintF("Illegal user tried to login!\n");
         reactor->Finish(grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid credentials"));
         return reactor;
     } else {
-        std::string &user_name = name.value();
-        if (auto user = userManager.get_user_by_name(user_name)) {
-            auto id = user.value()->id();
-            result->set_user_id(id);
-            absl::PrintF("User %s (%u) logged in\n", user_name, id);
-        } else {
-            result->set_user_id(0);
-            absl::PrintF("Could not find user %s? \n", user_name);
-        }
+        result->set_user_id(user.value()->id());
+        absl::PrintF("User %s (%u) logged in\n", user.value()->name(), user.value()->id());
         reactor->Finish(grpc::Status::OK);
         return reactor;
     }

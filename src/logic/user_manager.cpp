@@ -110,7 +110,7 @@ bool UserManager::check_user_credentials(api::chat::UserCredentials &credentials
     return check_user_credentials(name, password);
 }
 
-std::optional<std::string>
+std::optional<api::chat::User *>
 UserManager::check_user_credentials(UserManager::Metadata &metadata) {
     std::string name;
     std::string password;
@@ -124,5 +124,9 @@ UserManager::check_user_credentials(UserManager::Metadata &metadata) {
     }
     auto success = check_user_credentials(name, password);
 
-    return success ? std::optional{name} : std::nullopt;
+    if (success) {
+        return get_user_by_name(name);
+    } else {
+        return std::nullopt;
+    }
 }

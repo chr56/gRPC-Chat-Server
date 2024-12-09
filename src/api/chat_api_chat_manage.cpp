@@ -10,8 +10,8 @@ ChatApiService::CreateChat(grpc::CallbackServerContext *context, const CreateCha
 
     // Authenticate user
     auto metadata = context->client_metadata();
-    auto name = userManager.check_user_credentials(metadata);
-    if (!name) {
+    auto user = userManager.check_user_credentials(metadata);
+    if (!user) {
         absl::PrintF("Illegal user tried to login!\n");
         reactor->Finish(grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid credentials"));
         return reactor;
@@ -30,8 +30,8 @@ ChatApiService::DeleteChat(grpc::CallbackServerContext *context, const DeleteCha
 
     // Authenticate user
     auto metadata = context->client_metadata();
-    auto name = userManager.check_user_credentials(metadata);
-    if (!name) {
+    auto user = userManager.check_user_credentials(metadata);
+    if (!user) {
         absl::PrintF("Illegal user tried to login!\n");
         reactor->Finish(grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid credentials"));
         return reactor;
@@ -51,8 +51,8 @@ ChatApiService::ManageGroupMember(grpc::CallbackServerContext *context, const Gr
 
     // Authenticate user
     auto metadata = context->client_metadata();
-    auto name = userManager.check_user_credentials(metadata);
-    if (!name) {
+    auto user = userManager.check_user_credentials(metadata);
+    if (!user) {
         absl::PrintF("Illegal user tried to login!\n");
         reactor->Finish(grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid credentials"));
         return reactor;

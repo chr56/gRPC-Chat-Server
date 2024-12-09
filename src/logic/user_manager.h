@@ -40,7 +40,7 @@ public:
     bool check_user_credentials(std::string &name, std::string &password);
     bool check_user_credentials(api::chat::UserCredentials &credentials);
 
-    std::optional<std::string> check_user_credentials(Metadata &metadata);
+    std::optional<api::chat::User*> check_user_credentials(Metadata &metadata);
     //endregion
 
 
