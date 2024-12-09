@@ -21,6 +21,63 @@ std::optional<Chat *> ChatManager::get_chat_by_id(uint64_t id) {
     }
 }
 
+std::list<api::chat::Chat> ChatManager::get_all_group_chats(uint64_t user_id) {
+    std::list<api::chat::Chat> results;
+    for (const auto &[id, chat]: _all_chats) {
+        if (chat.is_group()) {
+            const auto &members = chat.members().users();
+            auto user_found = std::find_if(members.begin(), members.end(), [user_id](const api::chat::User &user) {
+                return user.id() == user_id;
+            });
+
+            if (user_found != members.end()) {
+                results.push_back(chat);
+            }
+        }
+    }
+    return results;
+}
+
+std::list<api::chat::Chat> ChatManager::get_all_private_chats(uint64_t user_id) {
+    std::list<api::chat::Chat> results;
+    for (const auto &[id, chat]: _all_chats) {
+        if (!chat.is_group()) {
+            const auto &members = chat.members().users();
+            if (members.size() > 2) continue;
+            auto user_found = std::find_if(members.begin(), members.end(), [user_id](const api::chat::User &user) {
+                return user.id() == user_id;
+            });
+
+            if (user_found != members.end()) {
+                results.push_back(chat);
+            }
+        }
+    }
+    return results;
+}
+
+std::optional<api::chat::Chat> ChatManager::get_private_chat(uint64_t user1_id, uint64_t user2_id) {
+    std::list<api::chat::Chat> results;
+    for (const auto &[id, chat]: _all_chats) {
+        if (!chat.is_group()) {
+            const auto &members = chat.members().users();
+            if (members.size() != 2) continue;
+
+            auto user1_found = std::find_if(members.begin(), members.end(), [user1_id](const api::chat::User &user) {
+                return user.id() == user1_id;
+            });
+
+            auto user2_found = std::find_if(members.begin(), members.end(), [user2_id](const api::chat::User &user) {
+                return user.id() == user2_id;
+            });
+
+            if (user1_found != members.end() && user2_found != members.end()) {
+                return std::optional{chat};
+            }
+        }
+    }
+    return std::nullopt;
+}
 
 std::optional<MessageList *> ChatManager::get_messages_by_id(uint64_t id) {
     auto it = _all_messages.find(id);

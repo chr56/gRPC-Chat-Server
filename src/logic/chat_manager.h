@@ -21,6 +21,15 @@ public:
     std::optional<api::chat::Chat *>
     get_chat_by_id(chat_id id);
 
+    std::list<api::chat::Chat>
+    get_all_group_chats(uint64_t user_id);
+
+    std::list<api::chat::Chat>
+    get_all_private_chats(uint64_t user_id);
+
+    std::optional<api::chat::Chat>
+    get_private_chat(uint64_t user1_id, uint64_t user2_id);
+
     std::optional<api::chat::MessageList *>
     get_messages_by_id(chat_id id);
 
