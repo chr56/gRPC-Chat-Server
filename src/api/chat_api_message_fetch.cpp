@@ -12,6 +12,11 @@ public:
     MessageStreamReactor(ChatApiService *service, grpc::CallbackServerContext *context, const FetchMessageListRequest *request)
             : _service(service), _context(context), _request(request) {}
 
+    static std::string request_target_name(const FetchMessageListRequest *_request) {
+        std::string str(_request->is_user() ? "User Chat" : "Group Chat");
+        return str + " (id: " + std::to_string(_request->target()) + ")";
+    }
+
     void Start() {
 
         // Authenticate user
@@ -29,21 +34,48 @@ public:
         _id = user.value()->id();
         _connected = true;
         _service->_clients.push_back(this);
-        absl::PrintF("User %s connected to Chat(id: %u)\n", _username, _request->target());
+        absl::PrintF("User %s connected to %s\n", _username, request_target_name(_request));
 
-        // Update messages
+        // Find Message
+        uint64_t chat_id;
+        uint64_t target = _request->target();
+        if (_request->is_user()) {
+            // Private Messages
+            auto chat = _service->chatManager.get_private_chat(_id, target);
+            if (!chat) {
+                // Create new chat
+                chat_id = _service->chatManager.create_chat_and_messages("Private Messages", "Private Messages", false);
+                auto me = _service->userManager.get_user_by_id(_id);
+                auto other = _service->userManager.get_user_by_id(target);
+                if (other.has_value() && me.has_value()) {
+                    _service->chatManager.add_members(chat_id, me.value());
+                    _service->chatManager.add_members(chat_id, other.value());
+                    absl::PrintF("Create a new private chat %ul (user %ul and %ul)\n", chat_id, _id, target);
+                } else{
+                    this->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, absl::StrFormat("%s Not Found", request_target_name(_request))));
+                    delete this;
+                    return;
+                }
+            } else {
+                // Already created
+                chat_id = chat->id();
+            }
+        } else {
+            // Group Message
+            chat_id = target;
+        }
 
-        uint64_t target_chat = _request->target();
-        auto messages = _service->chatManager.get_messages_by_id(target_chat);
-
+        // Checking Messages
+        auto messages = _service->chatManager.get_messages_by_id(chat_id);
         if (!messages) {
-            this->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, "Chat Not Found"));
+            this->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, absl::StrFormat("%s Not Found", request_target_name(_request))));
             delete this;
             return;
         }
 
+        // Sending messages
         _writing = true;
-        absl::PrintF("Sending Chat Messages(id: %u) to %s\n", target_chat, _username);
+        absl::PrintF("Sending %s Messages to %s\n", request_target_name(_request), _username);
         StartWrite(messages.value());
     }
 
@@ -69,7 +101,7 @@ public:
     }
 
     void OnDone() override {
-        absl::PrintF("User %s terminated from Chat(id: %u)\n", _username.c_str(), _request->target());
+        absl::PrintF("User %s terminated from %s\n", _username, request_target_name(_request));
         _connected = false;
         _service->_clients.remove(this);
         this->Finish(grpc::Status::OK);
@@ -77,7 +109,7 @@ public:
     }
 
     void OnCancel() override {
-        absl::PrintF("User %s disconnected from Chat(id: %u)\n", _username.c_str(), _request->target());
+        absl::PrintF("User %s disconnected from %s\n", _username, request_target_name(_request));
         _connected = false;
     }
 
