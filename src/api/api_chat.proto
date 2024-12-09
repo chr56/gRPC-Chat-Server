@@ -54,6 +54,8 @@ message Chat {
 }
 message ChatList {
     repeated Chat chats = 1;
+    repeated Chat group_chats = 6;
+    repeated Chat private_chats = 7;
 }
 
 /////////////////////////
@@ -69,6 +71,7 @@ message FetchMessageListRequest {
 message SendMessageRequest {
     Message message = 1;
     uint64 target = 2;
+    bool is_user = 3;
 }
 
 message CreateChatRequest {
@@ -111,7 +114,9 @@ message FriendManageOperation {
 service ChatService {
 
     rpc Login(UserCredentials) returns (LoginResult) {}
+    rpc Register(UserCredentials) returns (LoginResult) {}
 
+    rpc FetchFriendList(None) returns (UserList) {}
     rpc FetchChatList(None) returns (ChatList) {}
     rpc FetchMessageList(FetchMessageListRequest) returns (stream MessageList) {}
 
@@ -121,8 +126,6 @@ service ChatService {
     rpc DeleteChat(DeleteChatRequest) returns (None) {}
 
     rpc ManageGroupMember(GroupMemberManageOperation) returns (None) {}
-
-    rpc FetchFriendList(None) returns (UserList) {}
     rpc ManageFriend(FriendManageOperation) returns (None) {}
 }
 
