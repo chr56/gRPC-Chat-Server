@@ -40,7 +40,7 @@ UserManager::get_user_by_name(std::string_view name) {
     }
 }
 
-int user_id = 101;
+int user_id = 20001;
 
 std::optional<api::chat::User *>
 UserManager::register_user(const std::string &name, const std::string &password) {
@@ -68,7 +68,7 @@ UserManager::UserManager(const Database &database) : db(database) {
         auto username = std::string("user") + std::to_string(i);
         auto description = std::string("Test user");
         auto password = std::string("qwerty");
-        add_user(i, username, password, description);
+        add_user(10000 + i, username, password, description);
     }
 }
 
