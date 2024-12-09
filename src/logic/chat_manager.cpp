@@ -89,6 +89,7 @@ std::optional<MessageList *> ChatManager::get_messages_by_id(uint64_t id) {
 }
 
 uint64_t used_id = 0;
+
 uint64_t ChatManager::create_chat_and_messages(std::string name, std::string description, bool is_group) {
     uint64_t id = used_id++;
 
@@ -103,6 +104,16 @@ uint64_t ChatManager::create_chat_and_messages(std::string name, std::string des
     _all_messages[id] = test_message_list;
 
     return id;
+}
+
+
+bool ChatManager::add_members(uint64_t chat_id, api::chat::User *user) {
+    const auto &chat = get_chat_by_id(chat_id);
+    if (!chat.has_value()) return false;
+
+    User *newMember = chat.value()->mutable_members()->add_users();
+    newMember->set_id(user->id());
+    newMember->set_name(user->name());
 }
 
 

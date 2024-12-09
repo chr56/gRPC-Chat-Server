@@ -79,9 +79,7 @@ ChatApiService::ManageGroupMember(grpc::CallbackServerContext *context, const Gr
     User *member = founded_member.value();
     GroupMemberManageOperation::ActionType action = operation->action();
     if (action == GroupMemberManageOperation::AddUser) {
-        User *newMember = chat->mutable_members()->add_users();
-        newMember->set_id(member->id());
-        newMember->set_name(member->name());
+        chatManager.add_members(chat_id, member);
     } else {
         UserList *members = chat->mutable_members();
         reactor->Finish(grpc::Status(grpc::StatusCode::UNIMPLEMENTED, ""));
