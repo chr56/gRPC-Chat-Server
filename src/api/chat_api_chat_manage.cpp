@@ -37,7 +37,7 @@ ChatApiService::DeleteChat(grpc::CallbackServerContext *context, const DeleteCha
         return reactor;
     }
 
-    if (chatManager.delete_chat(request->target_chat_id())) {
+    if (chatManager.delete_chat_and_messages(request->target_chat_id())) {
         reactor->Finish(grpc::Status::OK);
     } else {
         reactor->Finish(grpc::Status(grpc::StatusCode::INTERNAL, "Failed!"));

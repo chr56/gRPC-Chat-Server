@@ -11,25 +11,29 @@
 class ChatManager {
 public:
 
+    typedef uint64_t chat_id;
+
     explicit ChatManager(const Database &database);
 
     std::list<api::chat::Chat>
     list_all_chats();
 
     std::optional<api::chat::Chat *>
-    get_chat_by_id(uint64_t id);
+    get_chat_by_id(chat_id id);
 
     std::optional<api::chat::MessageList *>
-    get_messages_by_id(uint64_t id);
+    get_messages_by_id(chat_id id);
 
     uint64_t create_chat_and_messages(std::string name, std::string description, bool is_group);
-    bool delete_chat(uint64_t id);
+    bool delete_chat_and_messages(uint64_t id);
 
 private:
-    std::map<uint64_t, api::chat::Chat> _all_chats;
-    std::map<uint64_t, api::chat::MessageList> _all_messages; // chat_id to messages
 
-    void append_message(uint64_t chat_id, uint64_t timestamp, uint64_t user_id, std::string user_name, std::string content) const;
+    std::map<chat_id, api::chat::Chat> _all_chats;
+
+    std::map<chat_id, api::chat::MessageList> _all_messages;
+
+    void append_message(chat_id chat_id, uint64_t timestamp, uint64_t user_id, std::string user_name, std::string content);
     void setup_default_chat();
 
     Database db;

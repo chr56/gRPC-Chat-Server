@@ -31,10 +31,9 @@ std::optional<MessageList *> ChatManager::get_messages_by_id(uint64_t id) {
     }
 }
 
-uint64_t current_id = 0;
-
+uint64_t used_id = 0;
 uint64_t ChatManager::create_chat_and_messages(std::string name, std::string description, bool is_group) {
-    uint64_t id = current_id++;
+    uint64_t id = used_id++;
 
     Chat test_chat;
     test_chat.set_id(id);
@@ -50,7 +49,7 @@ uint64_t ChatManager::create_chat_and_messages(std::string name, std::string des
 }
 
 
-bool ChatManager::delete_chat(uint64_t id) {
+bool ChatManager::delete_chat_and_messages(uint64_t id) {
     _all_messages.erase(id);
     _all_chats.erase(id);
     return true;
@@ -66,17 +65,13 @@ void ChatManager::append_message(uint64_t chat_id,
                                  uint64_t timestamp,
                                  uint64_t user_id,
                                  std::string user_name,
-                                 std::string content) const {
-    Message message;
-    message.set_timestamp(timestamp);
-    message.set_content(content);
-    message.set_type(Message::Text);
-    message.set_sender_user_id(user_id);
-    message.set_sender_user_name(user_name);
-
-    auto list = _all_messages.at(chat_id);
-    Message *p = list.add_messages();
-    *p = message;
+                                 std::string content) {
+    Message *p = _all_messages[chat_id].add_messages();
+    p->set_timestamp(timestamp);
+    p->set_content(content);
+    p->set_type(Message::Text);
+    p->set_sender_user_id(user_id);
+    p->set_sender_user_name(user_name);
 }
 
 void ChatManager::setup_default_chat() {
