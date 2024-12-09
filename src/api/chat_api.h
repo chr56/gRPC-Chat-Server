@@ -89,9 +89,10 @@ private:
     class Client {
     public:
         virtual void NotifyNewMessage(uint64_t chat_id, const api::chat::Message &message) = 0;
+        virtual void NotifyNewPrivateMessage(uint64_t user_id, const api::chat::Message &message) = 0;
     };
 
-    void notifyClients(uint64_t chat_id, const api::chat::Message &message);
+    void notifyClients(uint64_t target, bool is_user, const api::chat::Message &message);
 
     Database db;
     UserManager userManager;

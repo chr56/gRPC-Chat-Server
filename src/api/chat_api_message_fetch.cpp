@@ -116,7 +116,7 @@ public:
     void NotifyNewMessage(uint64_t chat_id, const Message &message) override {
         if (!_connected) return;
 
-        if (chat_id != _request->target()) return;
+        if (_request->is_user() || chat_id != _request->target()) return;
 
 
         MessageList messages;
@@ -127,6 +127,24 @@ public:
             _pendingMessages.push_back(messages);
         } else {
             absl::PrintF("Notify new message (chat %u) to %s\n", chat_id, _username.c_str());
+            _writing = true;
+            StartWrite(&messages);
+        }
+    }
+
+    void NotifyNewPrivateMessage(uint64_t user_id, const Message &message) override {
+        if (!_connected) return;
+
+        if (!_request->is_user() || user_id != _request->target()) return;
+
+        MessageList messages;
+        *messages.add_messages() = message;
+
+        if (_writing) {
+            absl::PrintF("Notify new message (chat %u) to %s (pending)\n", user_id, _username.c_str());
+            _pendingMessages.push_back(messages);
+        } else {
+            absl::PrintF("Notify new message (chat %u) to %s\n", user_id, _username.c_str());
             _writing = true;
             StartWrite(&messages);
         }

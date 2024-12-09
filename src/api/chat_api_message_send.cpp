@@ -19,25 +19,48 @@ ChatApiService::SendMessageTo(grpc::CallbackServerContext *context, const SendMe
 
     // Check Messages
     auto id = request->target();
-    auto messages = chatManager.get_messages_by_id(id);
-    if (!messages) {
-        reactor->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, "Chat Not Found"));
-        return reactor;
+    MessageList *pending = nullptr;
+    bool is_private_message = request->is_user();
+    if (!is_private_message) {
+        // group message
+        auto messages = chatManager.get_messages_by_id(id);
+        if (!messages) {
+            reactor->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, "Chat Not Found"));
+            return reactor;
+        }
+        pending = messages.value();
+    } else {
+        const auto &chat = chatManager.get_private_chat(user.value()->id(), id);
+        if (!chat) {
+            reactor->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, "User Not Found"));
+            return reactor;
+        }
+        uint64_t chat_id = chat.value().id();
+        auto messages = chatManager.get_messages_by_id(chat_id);
+        if (!messages) {
+            reactor->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, "Chat Not Found"));
+            return reactor;
+        }
+        pending = messages.value();
     }
-    //  Notify new messages to other clients
-    auto *msg = messages.value()->add_messages();
+    //  Notify new messages
+    auto *msg = pending->add_messages();
     msg->set_sender_user_name(user.value()->name());
     msg->set_sender_user_id(0);
     *msg = request->message();
-    notifyClients(id, *msg);
+    notifyClients(id, is_private_message, *msg);
+
 
     reactor->Finish(grpc::Status::OK);
     return reactor;
 }
 
-void ChatApiService::notifyClients(uint64_t chat_id, const Message &message) {
+void ChatApiService::notifyClients(uint64_t target, bool is_user, const Message &message) {
     for (auto client: _clients) {
-        client->NotifyNewMessage(chat_id, message);
+        if (is_user)
+            client->NotifyNewPrivateMessage(target, message);
+        else
+            client->NotifyNewMessage(target, message);
     }
 }
 
