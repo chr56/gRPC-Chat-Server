@@ -29,6 +29,12 @@ public:
     ) override;
 
     grpc::ServerUnaryReactor *
+    Register(
+            grpc::CallbackServerContext *context,
+            const api::chat::UserCredentials *credentials, api::chat::LoginResult *result
+    ) override;
+
+    grpc::ServerUnaryReactor *
     FetchChatList(
             grpc::CallbackServerContext *context,
             const api::chat::None *none, api::chat::ChatList *list
