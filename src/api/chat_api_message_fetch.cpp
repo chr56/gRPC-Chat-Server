@@ -29,11 +29,11 @@ public:
         _id = user.value()->id();
         _connected = true;
         _service->_clients.push_back(this);
-        absl::PrintF("User %s connected to Chat(id: %u)\n", _username, _request->chat_id());
+        absl::PrintF("User %s connected to Chat(id: %u)\n", _username, _request->target());
 
         // Update messages
 
-        uint64_t target_chat = _request->chat_id();
+        uint64_t target_chat = _request->target();
         auto messages = _service->chatManager.get_messages_by_id(target_chat);
 
         if (!messages) {
@@ -69,7 +69,7 @@ public:
     }
 
     void OnDone() override {
-        absl::PrintF("User %s terminated from Chat(id: %u)\n", _username.c_str(), _request->chat_id());
+        absl::PrintF("User %s terminated from Chat(id: %u)\n", _username.c_str(), _request->target());
         _connected = false;
         _service->_clients.remove(this);
         this->Finish(grpc::Status::OK);
@@ -77,14 +77,14 @@ public:
     }
 
     void OnCancel() override {
-        absl::PrintF("User %s disconnected from Chat(id: %u)\n", _username.c_str(), _request->chat_id());
+        absl::PrintF("User %s disconnected from Chat(id: %u)\n", _username.c_str(), _request->target());
         _connected = false;
     }
 
     void NotifyNewMessage(uint64_t chat_id, const Message &message) override {
         if (!_connected) return;
 
-        if (chat_id != _request->chat_id()) return;
+        if (chat_id != _request->target()) return;
 
 
         MessageList messages;

@@ -65,7 +65,8 @@ message LoginResult {
 }
 
 message FetchMessageListRequest {
-    uint64 chat_id = 1;
+    uint64 target = 1;
+    bool is_user = 3;
 }
 
 message SendMessageRequest {
