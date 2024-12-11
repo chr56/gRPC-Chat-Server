@@ -79,6 +79,12 @@ public:
             const api::chat::FriendManageOperation *operation, api::chat::None *none
     ) override;
 
+    grpc::ServerUnaryReactor *
+    ManageUserInfo(
+            grpc::CallbackServerContext *context,
+            const api::chat::ManageUserInfoOperation *operation, api::chat::None *none
+    ) override;
+
 private:
 
     class Client {

@@ -72,3 +72,46 @@ ChatApiService::Register(grpc::CallbackServerContext *context, const UserCredent
         }
     }
 }
+
+grpc::ServerUnaryReactor *
+ChatApiService::ManageUserInfo(grpc::CallbackServerContext *context, const ManageUserInfoOperation *operation, None *none) {
+    auto reactor = context->DefaultReactor();
+
+    // Authenticate user
+    auto metadata = context->client_metadata();
+    auto user = valid_user_credentials(metadata);
+    if (!user) {
+        reactor->Finish(grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid credentials"));
+        return reactor;
+    }
+
+    ManageUserInfoOperation::ActionType action = operation->action();
+    switch (action) {
+        case ManageUserInfoOperation::UpdateUserName:
+            if (db.rename_user(user->id(), operation->data())) {
+                reactor->Finish(grpc::Status::OK);
+            } else {
+                reactor->Finish(grpc::Status(grpc::StatusCode::INTERNAL, "Failed!"));
+            }
+            break;
+        case ManageUserInfoOperation::UpdatePasswords:
+            if (db.change_password(user->id(), operation->data())) {
+                reactor->Finish(grpc::Status::OK);
+            } else {
+                reactor->Finish(grpc::Status(grpc::StatusCode::INTERNAL, "Failed!"));
+            }
+            break;
+        case ManageUserInfoOperation::DeleteAccount:
+            if (db.delete_user(user->id())) {
+                reactor->Finish(grpc::Status::OK);
+            } else {
+                reactor->Finish(grpc::Status(grpc::StatusCode::INTERNAL, "Failed!"));
+            }
+            break;
+        default:
+            reactor->Finish(grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, "Unknown command!"));
+            break;
+    }
+
+    return reactor;
+}
