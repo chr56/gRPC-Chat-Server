@@ -27,14 +27,14 @@ std::optional<api::chat::User> Database::get_user_by_name(const std::string &use
 }
 
 bool Database::check_user_credentials(std::string &user_name, std::string &password) {
-    for (const auto &pair: _userCredentials) {
+    for (const auto &pair: _user_credentials) {
         if (pair.second.name() == user_name && pair.second.password() == password) return true;
     }
     return false;
 }
 
 std::optional<api::chat::User> Database::valid_user_credentials(std::string &user_name, std::string &password) {
-    for (const auto &pair: _userCredentials) {
+    for (const auto &pair: _user_credentials) {
         if (pair.second.name() == user_name && pair.second.password() == password) {
             return get_user_by_id(pair.second.id());
         }
@@ -78,7 +78,7 @@ std::optional<api::chat::User> Database::add_new_user(std::string user_name, std
     credentials.set_id(id);
     credentials.set_name(user_name);
     credentials.set_password(password);
-    _userCredentials[id] = credentials;
+    _user_credentials[id] = credentials;
 
     return {user};
 }
@@ -88,7 +88,7 @@ bool Database::rename_user(uint64_t user_id, std::string new_user_name) {
     if (target.has_value()) {
         auto user = target.value();
         user.set_name(new_user_name);
-        _userCredentials[user_id].set_name(new_user_name);
+        _user_credentials[user_id].set_name(new_user_name);
         return true;
     }
     return false;
@@ -97,7 +97,7 @@ bool Database::rename_user(uint64_t user_id, std::string new_user_name) {
 bool Database::change_password(uint64_t user_id, std::string new_password) {
     const auto &target = get_user_by_id(user_id);
     if (target.has_value()) {
-        _userCredentials[user_id].set_password(new_password);
+        _user_credentials[user_id].set_password(new_password);
         return true;
     }
     return false;
@@ -107,7 +107,7 @@ bool Database::delete_user(uint64_t user_id) {
     const auto &target = get_user_by_id(user_id);
     if (target.has_value()) {
         _users.erase(user_id);
-        _userCredentials.erase(user_id);
+        _user_credentials.erase(user_id);
         return true;
     }
     return false;
@@ -120,19 +120,19 @@ bool Database::delete_user(uint64_t user_id) {
 
 std::list<api::chat::Chat> Database::get_all_chats() {
     std::list<api::chat::Chat> chats;
-    for (const auto &pair: _all_chats) chats.push_back(pair.second);
+    for (const auto &pair: _chats) chats.push_back(pair.second);
     return chats;
 }
 
 std::optional<api::chat::Chat> Database::get_chat_by_id(uint64_t chat_id) {
-    auto it = _all_chats.find(chat_id);
-    if (it != _all_chats.end()) return it->second;
+    auto it = _chats.find(chat_id);
+    if (it != _chats.end()) return it->second;
     return std::nullopt;
 }
 
 std::list<api::chat::Chat> Database::get_all_chats_for_user(uint64_t user_id) {
     std::list<api::chat::Chat> groups;
-    for (const auto &[id, chat]: _all_chats) {
+    for (const auto &[id, chat]: _chats) {
         for (const auto &member: chat.members().users()) {
             if (member.id() == user_id) {
                 groups.push_back(chat);
@@ -145,7 +145,7 @@ std::list<api::chat::Chat> Database::get_all_chats_for_user(uint64_t user_id) {
 
 std::list<api::chat::Chat> Database::get_all_group_chats_for_user(uint64_t user_id) {
     std::list<api::chat::Chat> groups;
-    for (const auto &[id, chat]: _all_chats) {
+    for (const auto &[id, chat]: _chats) {
         if (chat.is_group()) {
             for (const auto &member: chat.members().users()) {
                 if (member.id() == user_id) {
@@ -160,7 +160,7 @@ std::list<api::chat::Chat> Database::get_all_group_chats_for_user(uint64_t user_
 
 std::list<api::chat::Chat> Database::get_all_private_chats_for_user(uint64_t user_id) {
     std::list<api::chat::Chat> privates;
-    for (const auto &[id, chat]: _all_chats) {
+    for (const auto &[id, chat]: _chats) {
         if (!chat.is_group()) {
             for (const auto &member: chat.members().users()) {
                 if (member.id() == user_id) {
@@ -174,7 +174,7 @@ std::list<api::chat::Chat> Database::get_all_private_chats_for_user(uint64_t use
 }
 
 std::optional<api::chat::Chat> Database::get_private_chat(uint64_t user1_id, uint64_t user2_id) {
-    for (const auto &[id, chat]: _all_chats) {
+    for (const auto &[id, chat]: _chats) {
         if (!chat.is_group()) {
             const auto &members = chat.members().users();
             if (members.size() == 2 &&
@@ -188,8 +188,8 @@ std::optional<api::chat::Chat> Database::get_private_chat(uint64_t user1_id, uin
 }
 
 bool Database::add_member(uint64_t chat_id, uint64_t user_id) {
-    auto chat = _all_chats.find(chat_id);
-    if (chat != _all_chats.end()) {
+    auto chat = _chats.find(chat_id);
+    if (chat != _chats.end()) {
         auto *members = chat->second.mutable_members()->mutable_users();
         if (std::none_of(members->begin(), members->end(), [user_id](const api::chat::User &user) { return user.id() == user_id; })) {
             if (auto user = get_user_by_id(user_id)) {
@@ -205,8 +205,8 @@ bool Database::add_member(uint64_t chat_id, uint64_t user_id) {
 }
 
 bool Database::remove_member(uint64_t chat_id, uint64_t user_id) {
-    auto chat = _all_chats.find(chat_id);
-    if (chat != _all_chats.end()) {
+    auto chat = _chats.find(chat_id);
+    if (chat != _chats.end()) {
         auto *members = chat->second.mutable_members()->mutable_users();
         auto new_end = std::remove_if(members->begin(), members->end(), [user_id](const api::chat::User &user) { return user.id() == user_id; });
         members->erase(new_end, members->end());
@@ -221,22 +221,22 @@ uint64_t Database::create_chat_and_messages(std::string name, bool is_group) {
     chat.set_id(id);
     chat.set_name(name);
     chat.set_is_group(is_group);
-    _all_chats[id] = chat;
+    _chats[id] = chat;
     api::chat::MessageList messages;
     messages.set_chat_id(id);
-    _all_messages[id] = messages;
+    _messages[id] = messages;
     return id;
 }
 
 bool Database::delete_chat_and_messages(uint64_t chat_id) {
-    _all_chats.erase(chat_id);
-    _all_messages.erase(chat_id);
+    _chats.erase(chat_id);
+    _messages.erase(chat_id);
     return true;
 }
 
 std::optional<api::chat::MessageList *> Database::get_messages_by_id(uint64_t chat_id) {
-    auto it = _all_messages.find(chat_id);
-    if (it != _all_messages.end()) return &it->second;
+    auto it = _messages.find(chat_id);
+    if (it != _messages.end()) return &it->second;
     return std::nullopt;
 }
 

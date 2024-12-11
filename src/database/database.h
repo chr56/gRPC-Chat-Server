@@ -74,11 +74,12 @@ public:
 
 private:
 
-    std::map<uint64_t, api::chat::Chat> _all_chats;
-    std::map<uint64_t, api::chat::MessageList> _all_messages;
+    std::map<uint64_t, api::chat::Chat> _chats;
+    std::map<uint64_t, api::chat::MessageList> _messages;
 
     std::map<uint64_t, api::chat::User> _users;
-    std::map<uint64_t, api::chat::UserCredentials> _userCredentials;
+    std::map<uint64_t, api::chat::UserCredentials> _user_credentials;
+
     std::map<std::pair<uint64_t, uint64_t>, bool> _user_relationship;
 
     void setup_test_data();
