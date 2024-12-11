@@ -38,6 +38,10 @@ public:
 
     bool rename_user(uint64_t user_id, std::string new_user_name);
 
+    bool change_password(uint64_t user_id, std::string new_password);
+
+    bool delete_user(uint64_t user_id);
+
 
     //</editor-fold>
 

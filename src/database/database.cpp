@@ -94,6 +94,25 @@ bool Database::rename_user(uint64_t user_id, std::string new_user_name) {
     return false;
 }
 
+bool Database::change_password(uint64_t user_id, std::string new_password) {
+    const auto &target = get_user_by_id(user_id);
+    if (target.has_value()) {
+        _userCredentials[user_id].set_password(new_password);
+        return true;
+    }
+    return false;
+}
+
+bool Database::delete_user(uint64_t user_id) {
+    const auto &target = get_user_by_id(user_id);
+    if (target.has_value()) {
+        _users.erase(user_id);
+        _userCredentials.erase(user_id);
+        return true;
+    }
+    return false;
+}
+
 
 //</editor-fold>
 
