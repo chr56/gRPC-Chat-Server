@@ -11,16 +11,11 @@
 
 #include "../database/database.h"
 
-#include "../logic/chat_manager.h"
-#include "../logic/user_manager.h"
-
 
 class ChatApiService final : public api::chat::ChatService::CallbackService {
 public:
     explicit ChatApiService(const Database &database) :
-            db(database),
-            userManager(database), chatManager(database),
-            _clients() {}
+            db(database), _clients() {}
 
     grpc::ServerUnaryReactor *
     Login(
@@ -95,8 +90,6 @@ private:
     void notifyClients(uint64_t target, bool is_user, const api::chat::Message &message);
 
     Database db;
-    UserManager userManager;
-    ChatManager chatManager;
     std::list<Client *> _clients;
 
     class MessageStreamReactor;
