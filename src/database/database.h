@@ -66,6 +66,8 @@ public:
 
     bool delete_chat_and_messages(uint64_t chat_id);
 
+    std::list<api::chat::User> get_chat_members(uint64_t chat_id);
+
     bool add_member(uint64_t chat_id, uint64_t user_id);
 
     bool remove_member(uint64_t chat_id, uint64_t user_id);
@@ -81,6 +83,9 @@ private:
     std::map<uint64_t, api::chat::UserCredentials> _user_credentials;
 
     std::map<std::pair<uint64_t, uint64_t>, bool> _user_relationship;
+
+    typedef std::pair<uint64_t, uint64_t> user_group_relationship; // chat_id  <---> user_id
+    std::list<user_group_relationship> _chat_members;
 
     void setup_test_data();
 

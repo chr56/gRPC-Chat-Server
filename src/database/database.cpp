@@ -132,11 +132,11 @@ std::optional<api::chat::Chat> Database::get_chat_by_id(uint64_t chat_id) {
 
 std::list<api::chat::Chat> Database::get_all_chats_for_user(uint64_t user_id) {
     std::list<api::chat::Chat> groups;
-    for (const auto &[id, chat]: _chats) {
-        for (const auto &member: chat.members().users()) {
-            if (member.id() == user_id) {
-                groups.push_back(chat);
-                break;
+    for (const auto &[chat_id, member_id]: _chat_members) {
+        if (member_id == user_id) {
+            const auto &chat = get_chat_by_id(chat_id);
+            if (chat.has_value()) {
+                groups.push_back(chat.value());
             }
         }
     }
@@ -145,13 +145,11 @@ std::list<api::chat::Chat> Database::get_all_chats_for_user(uint64_t user_id) {
 
 std::list<api::chat::Chat> Database::get_all_group_chats_for_user(uint64_t user_id) {
     std::list<api::chat::Chat> groups;
-    for (const auto &[id, chat]: _chats) {
-        if (chat.is_group()) {
-            for (const auto &member: chat.members().users()) {
-                if (member.id() == user_id) {
-                    groups.push_back(chat);
-                    break;
-                }
+    for (const auto &[chat_id, member_id]: _chat_members) {
+        if (member_id == user_id) {
+            const auto &chat = get_chat_by_id(chat_id);
+            if (chat.has_value() && chat.value().is_group()) {
+                groups.push_back(chat.value());
             }
         }
     }
@@ -160,13 +158,11 @@ std::list<api::chat::Chat> Database::get_all_group_chats_for_user(uint64_t user_
 
 std::list<api::chat::Chat> Database::get_all_private_chats_for_user(uint64_t user_id) {
     std::list<api::chat::Chat> privates;
-    for (const auto &[id, chat]: _chats) {
-        if (!chat.is_group()) {
-            for (const auto &member: chat.members().users()) {
-                if (member.id() == user_id) {
-                    privates.push_back(chat);
-                    break;
-                }
+    for (const auto &[chat_id, member_id]: _chat_members) {
+        if (member_id == user_id) {
+            const auto &chat = get_chat_by_id(chat_id);
+            if (chat.has_value() && !chat.value().is_group()) {
+                privates.push_back(chat.value());
             }
         }
     }
@@ -174,42 +170,48 @@ std::list<api::chat::Chat> Database::get_all_private_chats_for_user(uint64_t use
 }
 
 std::optional<api::chat::Chat> Database::get_private_chat(uint64_t user1_id, uint64_t user2_id) {
-    for (const auto &[id, chat]: _chats) {
-        if (!chat.is_group()) {
-            const auto &members = chat.members().users();
-            if (members.size() == 2 &&
-                ((members[0].id() == user1_id && members[1].id() == user2_id) ||
-                 (members[0].id() == user2_id && members[1].id() == user1_id))) {
-                return chat;
+    for (const auto& rel : _chat_members) {
+        if (rel.second == user1_id) {
+            auto it = _chats.find(rel.first);
+            if (it != _chats.end() && !it->second.is_group()) {
+                for (const auto& rel2 : _chat_members) {
+                    if (rel2.first == rel.first && rel2.second == user2_id) {
+                        return it->second;
+                    }
+                }
             }
         }
     }
     return std::nullopt;
 }
 
-bool Database::add_member(uint64_t chat_id, uint64_t user_id) {
-    auto chat = _chats.find(chat_id);
-    if (chat != _chats.end()) {
-        auto *members = chat->second.mutable_members()->mutable_users();
-        if (std::none_of(members->begin(), members->end(), [user_id](const api::chat::User &user) { return user.id() == user_id; })) {
-            if (auto user = get_user_by_id(user_id)) {
-                members->Add()->CopyFrom(*user);
-                return true;
+std::list<api::chat::User> Database::get_chat_members(uint64_t chat_id) {
+    std::list<api::chat::User> members;
+    for (const auto& [c, m] : _chat_members) {
+        if (c == chat_id) {
+            auto it = get_user_by_id(m);
+            if (it) {
+                members.push_back(it.value());
             }
-        } else {
-            absl::PrintF("Database: user %ul is already in chat %ul", user_id, chat_id);
-            return true;
         }
+    }
+    return members;
+}
+
+bool Database::add_member(uint64_t chat_id, uint64_t user_id) {
+    auto rel = std::make_pair(chat_id, user_id);
+    if (std::find(_chat_members.begin(), _chat_members.end(), rel) == _chat_members.end()) {
+        _chat_members.push_back(rel);
+        return true;
     }
     return false;
 }
 
 bool Database::remove_member(uint64_t chat_id, uint64_t user_id) {
-    auto chat = _chats.find(chat_id);
-    if (chat != _chats.end()) {
-        auto *members = chat->second.mutable_members()->mutable_users();
-        auto new_end = std::remove_if(members->begin(), members->end(), [user_id](const api::chat::User &user) { return user.id() == user_id; });
-        members->erase(new_end, members->end());
+    auto rel = std::make_pair(chat_id, user_id);
+    auto it = std::find(_chat_members.begin(), _chat_members.end(), rel);
+    if (it != _chat_members.end()) {
+        _chat_members.erase(it);
         return true;
     }
     return false;
