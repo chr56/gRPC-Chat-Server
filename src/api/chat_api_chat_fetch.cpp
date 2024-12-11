@@ -55,3 +55,28 @@ ChatApiService::FetchChatList(grpc::CallbackServerContext *context, const None *
 
     return reactor;
 }
+
+grpc::ServerUnaryReactor *
+ChatApiService::FetchChatMemberList(grpc::CallbackServerContext *context, const ::FetchRequest *request, ::UserList *list) {
+
+    grpc::ServerUnaryReactor *reactor = context->DefaultReactor();
+
+    // Authenticate user
+    auto metadata = context->client_metadata();
+    auto user = valid_user_credentials(metadata);
+    if (!user) {
+        reactor->Finish(grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid credentials"));
+        return reactor;
+    }
+
+    uint64_t chat_id = request->target();
+    const auto &members = db.get_chat_members(chat_id);
+    absl::PrintF("Sending Chat Member list to %s ...\n", user.value().name());
+    for (const auto &member: members) {
+        User *newMember = list->add_users();
+        newMember->CopyFrom(member);
+    }
+    reactor->Finish(grpc::Status::OK);
+    absl::PrintF("Completed to send Chat Member list to %s!\n", user.value().name());
+    return reactor;
+}

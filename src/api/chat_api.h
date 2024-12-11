@@ -42,6 +42,12 @@ public:
     ) override;
 
     grpc::ServerUnaryReactor *
+    FetchChatMemberList(
+            grpc::CallbackServerContext *context,
+            const api::chat::FetchRequest *request, api::chat::UserList *list
+    ) override;
+
+    grpc::ServerUnaryReactor *
     SendMessageTo(
             grpc::CallbackServerContext *context,
             const api::chat::SendMessageRequest *request, api::chat::None *none
