@@ -64,7 +64,7 @@ message LoginResult {
     uint64 user_id = 1;
 }
 
-message FetchMessageListRequest {
+message FetchRequest {
     uint64 target = 1;
     bool is_user = 3;
 }
@@ -129,7 +129,8 @@ service ChatService {
 
     rpc FetchFriendList(None) returns (UserList) {}
     rpc FetchChatList(None) returns (ChatList) {}
-    rpc FetchMessageList(FetchMessageListRequest) returns (stream MessageList) {}
+    rpc FetchChatMemberList(FetchRequest) returns (UserList) {}
+    rpc FetchMessageList(FetchRequest) returns (stream MessageList) {}
 
     rpc SendMessageTo(SendMessageRequest) returns (None) {}
 

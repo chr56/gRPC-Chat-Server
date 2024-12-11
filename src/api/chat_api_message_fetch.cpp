@@ -9,10 +9,10 @@ using namespace api::chat;
 
 class ChatApiService::MessageStreamReactor : public grpc::ServerWriteReactor<MessageList>, ChatApiService::Client {
 public:
-    MessageStreamReactor(ChatApiService *service, grpc::CallbackServerContext *context, const FetchMessageListRequest *request)
+    MessageStreamReactor(ChatApiService *service, grpc::CallbackServerContext *context, const FetchRequest *request)
             : _service(service), _context(context), _request(request) {}
 
-    static std::string request_target_name(const FetchMessageListRequest *_request) {
+    static std::string request_target_name(const FetchRequest *_request) {
         std::string str(_request->is_user() ? "User Chat" : "Group Chat");
         return str + " (id: " + std::to_string(_request->target()) + ")";
     }
@@ -153,7 +153,7 @@ private:
 
     ChatApiService *_service;
     grpc::CallbackServerContext *_context;
-    const FetchMessageListRequest *_request;
+    const FetchRequest *_request;
 
     std::string _username;
     uint64_t _id;
@@ -164,7 +164,7 @@ private:
 };
 
 grpc::ServerWriteReactor<api::chat::MessageList> *
-ChatApiService::FetchMessageList(grpc::CallbackServerContext *context, const FetchMessageListRequest *request) {
+ChatApiService::FetchMessageList(grpc::CallbackServerContext *context, const FetchRequest *request) {
     auto reactor = new ChatApiService::MessageStreamReactor(this, context, request);
     reactor->Start();
     return reactor;

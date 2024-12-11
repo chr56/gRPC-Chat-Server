@@ -38,7 +38,7 @@ public:
     grpc::ServerWriteReactor<api::chat::MessageList> *
     FetchMessageList(
             grpc::CallbackServerContext *context,
-            const api::chat::FetchMessageListRequest *request
+            const api::chat::FetchRequest *request
     ) override;
 
     grpc::ServerUnaryReactor *
