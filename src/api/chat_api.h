@@ -102,6 +102,11 @@ private:
     class MessageStreamReactor;
 
     class ChatListReactor;
+
+    typedef std::multimap<grpc::string_ref, grpc::string_ref> Metadata;
+    std::optional<api::chat::User> valid_user_credentials(Metadata &metadata);
+
+    friend MessageStreamReactor;
 };
 
 

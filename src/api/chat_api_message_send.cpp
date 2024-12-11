@@ -11,7 +11,7 @@ ChatApiService::SendMessageTo(grpc::CallbackServerContext *context, const SendMe
 
     // Authenticate user
     auto metadata = context->client_metadata();
-    auto user = userManager.check_user_credentials(metadata);
+    auto user = valid_user_credentials(metadata);
     if (!user) {
         reactor->Finish(grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid credentials"));
         return reactor;
@@ -23,20 +23,20 @@ ChatApiService::SendMessageTo(grpc::CallbackServerContext *context, const SendMe
     bool is_private_message = request->is_user();
     if (!is_private_message) {
         // group message
-        auto messages = chatManager.get_messages_by_id(id);
+        auto messages = db.get_messages_by_id(id);
         if (!messages) {
             reactor->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, "Chat Not Found"));
             return reactor;
         }
         pending = messages.value();
     } else {
-        const auto &chat = chatManager.get_private_chat(user.value()->id(), id);
+        const auto &chat = db.get_private_chat(user.value().id(), id);
         if (!chat) {
             reactor->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, "User Not Found"));
             return reactor;
         }
         uint64_t chat_id = chat.value().id();
-        auto messages = chatManager.get_messages_by_id(chat_id);
+        auto messages = db.get_messages_by_id(chat_id);
         if (!messages) {
             reactor->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, "Chat Not Found"));
             return reactor;
@@ -45,7 +45,7 @@ ChatApiService::SendMessageTo(grpc::CallbackServerContext *context, const SendMe
     }
     //  Notify new messages
     auto *msg = pending->add_messages();
-    msg->set_sender_user_name(user.value()->name());
+    msg->set_sender_user_name(user.value().name());
     msg->set_sender_user_id(0);
     *msg = request->message();
     notifyClients(id, is_private_message, *msg);

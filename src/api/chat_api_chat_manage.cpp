@@ -10,15 +10,15 @@ ChatApiService::CreateChat(grpc::CallbackServerContext *context, const CreateCha
 
     // Authenticate user
     auto metadata = context->client_metadata();
-    auto user = userManager.check_user_credentials(metadata);
+    auto user = valid_user_credentials(metadata);
     if (!user) {
-        absl::PrintF("Illegal user tried to login!\n");
         reactor->Finish(grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid credentials"));
         return reactor;
     }
 
 
-    chatManager.create_chat_and_messages(request->name(), request->description(), true);
+    uint64_t chat_id = db.create_chat_and_messages(request->name(), true);
+    db.add_member(chat_id, user->id());
 
     reactor->Finish(grpc::Status::OK);
     return reactor;
@@ -30,14 +30,13 @@ ChatApiService::DeleteChat(grpc::CallbackServerContext *context, const DeleteCha
 
     // Authenticate user
     auto metadata = context->client_metadata();
-    auto user = userManager.check_user_credentials(metadata);
+    auto user = valid_user_credentials(metadata);
     if (!user) {
-        absl::PrintF("Illegal user tried to login!\n");
         reactor->Finish(grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid credentials"));
         return reactor;
     }
 
-    if (chatManager.delete_chat_and_messages(request->target_chat_id())) {
+    if (db.delete_chat_and_messages(request->target_chat_id())) {
         reactor->Finish(grpc::Status::OK);
     } else {
         reactor->Finish(grpc::Status(grpc::StatusCode::INTERNAL, "Failed!"));
@@ -51,38 +50,36 @@ ChatApiService::ManageGroupMember(grpc::CallbackServerContext *context, const Gr
 
     // Authenticate user
     auto metadata = context->client_metadata();
-    auto user = userManager.check_user_credentials(metadata);
+    auto user = valid_user_credentials(metadata);
     if (!user) {
-        absl::PrintF("Illegal user tried to login!\n");
         reactor->Finish(grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid credentials"));
         return reactor;
     }
 
     // Chat
     uint64_t chat_id = operation->target_chat_id();
-    const auto &founded_chat = chatManager.get_chat_by_id(chat_id);
+    const auto &founded_chat = db.get_chat_by_id(chat_id);
     if (!founded_chat) {
         reactor->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, absl::StrFormat("Chat %ul not found!", chat_id)));
         return reactor;
     }
 
     // Member
-    uint64_t user_id = operation->target_user_id();
-    const auto &founded_member = userManager.get_user_by_id(user_id);
+    uint64_t member_id = operation->target_user_id();
+    const auto &founded_member = db.get_user_by_id(member_id);
     if (!founded_member) {
-        reactor->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, absl::StrFormat("User %ul not found!", user_id)));
+        reactor->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, absl::StrFormat("User %ul not found!", member_id)));
         return reactor;
     }
 
     // Action
-    Chat *chat = founded_chat.value();
-    User *member = founded_member.value();
+    auto chat = founded_chat.value();
+    auto member = founded_member.value();
     GroupMemberManageOperation::ActionType action = operation->action();
     if (action == GroupMemberManageOperation::AddUser) {
-        chatManager.add_members(chat_id, member);
+        db.add_member(chat_id, member_id);
     } else {
-        UserList *members = chat->mutable_members();
-        reactor->Finish(grpc::Status(grpc::StatusCode::UNIMPLEMENTED, ""));
+        db.remove_member(chat_id, member_id);
     }
 
     reactor->Finish(grpc::Status::OK);

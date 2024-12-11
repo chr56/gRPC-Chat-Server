@@ -9,23 +9,12 @@ using namespace api::chat;
 class ChatApiService::ChatListReactor : public grpc::ServerUnaryReactor {
 public:
     ChatListReactor(
-            grpc::CallbackServerContext *context, ChatList *reply, ChatManager chatManager, UserManager userManager
+            grpc::CallbackServerContext *context, ChatList *reply, uint64_t user_id, Database &db
     ) : _context(context) {
-        const std::list<Chat> &allChats = chatManager.list_all_chats();
+        const std::list<Chat> &allChats = db.get_all_group_chats_for_user(user_id);
         for (const auto &chat: allChats) {
             Chat *newChat = pending.add_chats();
-            newChat->set_id(chat.id());
-            newChat->set_name(chat.name());
-            newChat->set_is_group(chat.is_group());
-            newChat->set_description(chat.description());
-            auto members = newChat->mutable_members();
-            const auto &users = userManager.list_all_users();
-            for (auto item: users) { // todo
-                User *user = members->add_users();
-                user->set_id(item->id());
-                user->set_name(item->name());
-                user->set_description(item->description());
-            }
+            newChat->CopyFrom(chat);
         }
         reply->Swap(&pending);
         Finish(grpc::Status::OK);
@@ -54,15 +43,15 @@ ChatApiService::FetchChatList(grpc::CallbackServerContext *context, const None *
 
     // Authenticate user
     auto metadata = context->client_metadata();
-    auto user = userManager.check_user_credentials(metadata);
+    auto user = valid_user_credentials(metadata);
     if (!user) {
         reactor = context->DefaultReactor();
         reactor->Finish(grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid credentials"));
         return reactor;
     }
-    absl::PrintF("Sending Chat list to %s \n", user.value()->name());
+    absl::PrintF("Sending Chat list to %s \n", user.value().name());
 
-    reactor = new ChatApiService::ChatListReactor(context, list, chatManager, userManager);
+    reactor = new ChatApiService::ChatListReactor(context, list, user.value().id(), db);
 
     return reactor;
 }

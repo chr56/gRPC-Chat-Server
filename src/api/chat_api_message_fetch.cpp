@@ -21,17 +21,16 @@ public:
 
         // Authenticate user
         auto metadata = _context->client_metadata();
-        auto user = _service->userManager.check_user_credentials(metadata);
+        auto user = _service->valid_user_credentials(metadata);
         if (!user) {
             this->Finish(grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid credentials"));
             delete this;
-            absl::PrintF("Illegal user tried to login!\n");
             return;
         }
 
         // Register user
-        _username = user.value()->name();
-        _id = user.value()->id();
+        _username = user.value().name();
+        _id = user.value().id();
         _connected = true;
         _service->_clients.push_back(this);
         absl::PrintF("User %s connected to %s\n", _username, request_target_name(_request));
@@ -41,17 +40,17 @@ public:
         uint64_t target = _request->target();
         if (_request->is_user()) {
             // Private Messages
-            auto chat = _service->chatManager.get_private_chat(_id, target);
+            auto chat = _service->db.get_private_chat(_id, target);
             if (!chat) {
                 // Create new chat
-                chat_id = _service->chatManager.create_chat_and_messages("Private Messages", "Private Messages", false);
-                auto me = _service->userManager.get_user_by_id(_id);
-                auto other = _service->userManager.get_user_by_id(target);
+                chat_id = _service->db.create_chat_and_messages("Private Messages", false);
+                auto me = _service->db.get_user_by_id(_id);
+                auto other = _service->db.get_user_by_id(target);
                 if (other.has_value() && me.has_value()) {
-                    _service->chatManager.add_members(chat_id, me.value());
-                    _service->chatManager.add_members(chat_id, other.value());
+                    _service->db.add_member(chat_id, _id);
+                    _service->db.add_member(chat_id, target);
                     absl::PrintF("Create a new private chat %ul (user %ul and %ul)\n", chat_id, _id, target);
-                } else{
+                } else {
                     this->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, absl::StrFormat("%s Not Found", request_target_name(_request))));
                     delete this;
                     return;
@@ -66,7 +65,7 @@ public:
         }
 
         // Checking Messages
-        auto messages = _service->chatManager.get_messages_by_id(chat_id);
+        auto messages = _service->db.get_messages_by_id(chat_id);
         if (!messages) {
             this->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, absl::StrFormat("%s Not Found", request_target_name(_request))));
             delete this;
