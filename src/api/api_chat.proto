@@ -112,6 +112,16 @@ message FriendManageOperation {
     uint64 friend_id = 4;
 }
 
+message ManageUserInfoOperation {
+    enum ActionType {
+        UpdateUserName = 0;
+        UpdatePasswords = 1;
+        DeleteAccount = 2;
+    }
+    ActionType action = 1;
+    optional string data = 2;
+}
+
 service ChatService {
 
     rpc Login(UserCredentials) returns (LoginResult) {}
@@ -128,6 +138,8 @@ service ChatService {
 
     rpc ManageGroupMember(GroupMemberManageOperation) returns (None) {}
     rpc ManageFriend(FriendManageOperation) returns (None) {}
+
+    rpc ManageUserInfo(ManageUserInfoOperation) returns (None) {}
 }
 
 /////////////////////////
