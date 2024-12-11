@@ -22,9 +22,11 @@ public:
 
     std::optional<api::chat::User> get_user_by_id(uint64_t user_id);
 
-    std::optional<api::chat::User> get_user_by_name(uint64_t user_name);
+    std::optional<api::chat::User> get_user_by_name(const std::string& user_name);
 
-    bool check_user_password(std::string &user_name, std::string &password);
+    bool check_user_credentials(std::string &user_name, std::string &password);
+
+    std::optional<api::chat::User> valid_user_credentials(std::string &user_name, std::string &password);
 
     std::list<api::chat::User> get_user_friends(uint64_t user_id);
 
@@ -32,29 +34,53 @@ public:
 
     bool remove_friend(uint64_t user_id, uint64_t friend_id);
 
+    std::optional<api::chat::User> add_new_user(std::string user_name, std::string password);
+
+    bool rename_user(uint64_t user_id, std::string new_user_name);
+
+
     //</editor-fold>
 
 
-    //<editor-fold desc="Group">
+    //<editor-fold desc="Chat">
 
-    std::list<api::chat::Chat> get_all_groups();
+    std::list<api::chat::Chat> get_all_chats();
 
-    std::list<api::chat::Chat> get_all_groups_for_user(uint64_t user_id);
+    std::optional<api::chat::Chat> get_chat_by_id(uint64_t chat_id);
 
-    std::optional<api::chat::Chat> get_group_by_id(uint64_t group_id);
+    std::list<api::chat::Chat> get_all_chats_for_user(uint64_t user_id);
 
-    bool create_group(std::string &name);
+    std::list<api::chat::Chat> get_all_group_chats_for_user(uint64_t user_id);
 
-    bool remove_group(uint64_t group_id);
+    std::list<api::chat::Chat> get_all_private_chats_for_user(uint64_t user_id);
 
-    bool add_member(uint64_t group_id, uint64_t user_id);
+    std::optional<api::chat::Chat> get_private_chat(uint64_t user1_id, uint64_t user2_id);
 
-    bool remove_member(uint64_t group_id, uint64_t user_id);
+    std::optional<api::chat::MessageList *> get_messages_by_id(uint64_t chat_id);
+
+    uint64_t create_chat_and_messages(std::string name, bool is_group);
+
+    bool delete_chat_and_messages(uint64_t chat_id);
+
+    bool add_member(uint64_t chat_id, uint64_t user_id);
+
+    bool remove_member(uint64_t chat_id, uint64_t user_id);
 
     //</editor-fold>
 
 private:
 
+    std::map<uint64_t, api::chat::Chat> _all_chats;
+    std::map<uint64_t, api::chat::MessageList> _all_messages;
+
+    std::map<uint64_t, api::chat::User> _users;
+    std::map<uint64_t, api::chat::UserCredentials> _userCredentials;
+    std::map<std::pair<uint64_t, uint64_t>, bool> _user_relationship;
+
+    void setup_test_data();
+
+    uint64_t user_id_incremental = 10001;
+    uint64_t chat_id_incremental = 10;
 };
 
 
