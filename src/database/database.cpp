@@ -55,6 +55,7 @@ std::list<api::chat::User> Database::get_user_friends(uint64_t user_id) {
 }
 
 bool Database::make_friend(uint64_t user_id, uint64_t friend_id) {
+    if (user_id == friend_id) return false;
     _user_relationship[{user_id, friend_id}] = true;
     _user_relationship[{friend_id, user_id}] = true;
     return true;
