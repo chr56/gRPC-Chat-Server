@@ -38,6 +38,8 @@ add_executable(chat_server
     src/api/chat_api_message_send.cpp
     src/database/database.h
     src/database/database.cpp
+    src/database/mysql_helper.h
+    src/database/mysql_helper.cpp
     )
 
 target_link_libraries(
