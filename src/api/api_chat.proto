@@ -36,15 +36,6 @@ message UserList {
     repeated User users = 1;
 }
 
-message UserCredentials {
-    uint64 id = 1;
-    string name = 2;
-    string password = 7;
-}
-message UserCredentialsList {
-    repeated UserCredentials users = 1;
-}
-
 message Chat {
     uint64 id = 1;
     string name = 2;
@@ -60,8 +51,18 @@ message ChatList {
 
 /////////////////////////
 
+message UserCredentials {
+    uint64 id = 1;
+    string name = 2;
+    string password = 7;
+}
+message UserCredentialsList {
+    repeated UserCredentials users = 1;
+}
+
 message LoginResult {
     uint64 user_id = 1;
+    string name = 2;
 }
 
 message FetchRequest {
