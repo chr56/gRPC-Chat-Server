@@ -38,34 +38,16 @@ public:
         // Find Message
         uint64_t chat_id;
         uint64_t target = _request->target();
+        std::optional<api::chat::MessageList *> messages;
         if (_request->is_user()) {
             // Private Messages
-            auto chat = _service->db.get_private_chat(_id, target);
-            if (!chat) {
-                // Create new chat
-                chat_id = _service->db.create_chat_and_messages("Private Messages", false);
-                auto me = _service->db.get_user_by_id(_id);
-                auto other = _service->db.get_user_by_id(target);
-                if (other.has_value() && me.has_value()) {
-                    _service->db.add_member(chat_id, _id);
-                    _service->db.add_member(chat_id, target);
-                    absl::PrintF("Create a new private chat %ul (user %ul and %ul)\n", chat_id, _id, target);
-                } else {
-                    this->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, absl::StrFormat("%s Not Found", request_target_name(_request))));
-                    delete this;
-                    return;
-                }
-            } else {
-                // Already created
-                chat_id = chat->id();
-            }
+            messages = _service->db.get_private_messages_by_id(_id, target);
         } else {
             // Group Message
-            chat_id = target;
+            messages = _service->db.get_group_messages_by_id(target);
         }
 
         // Checking Messages
-        auto messages = _service->db.get_messages_by_id(chat_id);
         if (!messages) {
             this->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, absl::StrFormat("%s Not Found", request_target_name(_request))));
             delete this;

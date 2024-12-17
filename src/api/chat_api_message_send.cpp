@@ -23,20 +23,14 @@ ChatApiService::SendMessageTo(grpc::CallbackServerContext *context, const SendMe
     bool is_private_message = request->is_user();
     if (!is_private_message) {
         // group message
-        auto messages = db.get_messages_by_id(id);
+        auto messages = db.get_group_messages_by_id(id);
         if (!messages) {
             reactor->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, "Chat Not Found"));
             return reactor;
         }
         pending = messages.value();
     } else {
-        const auto &chat = db.get_private_chat(user.value().id(), id);
-        if (!chat) {
-            reactor->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, "User Not Found"));
-            return reactor;
-        }
-        uint64_t chat_id = chat.value().id();
-        auto messages = db.get_messages_by_id(chat_id);
+        auto messages = db.get_private_messages_by_id(user.value().id(), id);
         if (!messages) {
             reactor->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, "Chat Not Found"));
             return reactor;

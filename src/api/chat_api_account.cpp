@@ -6,21 +6,28 @@
 
 using namespace api::chat;
 
+constexpr std::string_view field_id("user-id");
 constexpr std::string_view field_name("user-name");
 constexpr std::string_view field_password("user-password");
 
 std::optional<api::chat::User> ChatApiService::valid_user_credentials(Metadata &metadata) {
-    std::string name;
+    uint64_t id = 0;
     std::string password;
     for (const auto &[key, value]: std::as_const(metadata)) {
-        if (std::string(key.data(), key.size()) == field_name) {
-            name = std::string(value.data(), value.size());
+        if (std::string(key.data(), key.size()) == field_id) {
+            std::string id_string = std::string(value.data(), value.size());
+            try {
+                id = std::stoull(id_string);
+            } catch (...) {
+                absl::PrintF("Metadata is corrupted (user-id: %s)! \n", id_string);
+                return std::nullopt;
+            }
         }
         if (std::string(key.data(), key.size()) == field_password) {
             password = std::string(value.data(), value.size());
         }
     }
-    auto user = db.valid_user_credentials(name, password);
+    auto user = db.valid_user_credentials(id, password);
     return user;
 }
 
@@ -50,26 +57,19 @@ ChatApiService::Register(grpc::CallbackServerContext *context, const UserCredent
     auto &name = credentials->name();
     auto &password = credentials->password();
 
-    if (db.get_user_by_name(name).has_value()) {
-        const std::string message = absl::StrFormat("Username %s existed!", name);
+    auto user = db.add_new_user(name, password);
+    if (user.has_value()) {
+        result->set_name(user->name());
+        result->set_user_id(user.value().id());
+        reactor->Finish(grpc::Status::OK);
+        absl::PrintF("User %s registered! \n", name);
+        return reactor;
+    } else {
+        const std::string message = absl::StrFormat("Could not register user with name %s! \n", name);
         result->set_user_id(0);
         reactor->Finish(grpc::Status(grpc::StatusCode::UNAVAILABLE, message));
         std::cout << message;
         return reactor;
-    } else {
-        auto user = db.add_new_user(name, password);
-        if (user.has_value()) {
-            result->set_user_id(user.value().id());
-            reactor->Finish(grpc::Status::OK);
-            absl::PrintF("User %s registered! \n", name);
-            return reactor;
-        } else {
-            const std::string message = absl::StrFormat("Could not register user with name %s! \n", name);
-            result->set_user_id(0);
-            reactor->Finish(grpc::Status(grpc::StatusCode::UNAVAILABLE, message));
-            std::cout << message;
-            return reactor;
-        }
     }
 }
 

@@ -17,7 +17,7 @@ ChatApiService::CreateChat(grpc::CallbackServerContext *context, const CreateCha
     }
 
 
-    uint64_t chat_id = db.create_chat_and_messages(request->name(), true);
+    uint64_t chat_id = db.create_group_chat_and_messages(request->name());
     db.add_member(chat_id, user->id());
 
     reactor->Finish(grpc::Status::OK);
@@ -36,7 +36,7 @@ ChatApiService::DeleteChat(grpc::CallbackServerContext *context, const DeleteCha
         return reactor;
     }
 
-    if (db.delete_chat_and_messages(request->target_chat_id())) {
+    if (db.delete_group_chat_and_messages(request->target_chat_id())) {
         reactor->Finish(grpc::Status::OK);
     } else {
         reactor->Finish(grpc::Status(grpc::StatusCode::INTERNAL, "Failed!"));
@@ -58,7 +58,7 @@ ChatApiService::ManageGroupMember(grpc::CallbackServerContext *context, const Gr
 
     // Chat
     uint64_t chat_id = operation->target_chat_id();
-    const auto &founded_chat = db.get_chat_by_id(chat_id);
+    const auto &founded_chat = db.get_group_chat_by_id(chat_id);
     if (!founded_chat) {
         reactor->Finish(grpc::Status(grpc::StatusCode::NOT_FOUND, absl::StrFormat("Chat %ul not found!", chat_id)));
         return reactor;

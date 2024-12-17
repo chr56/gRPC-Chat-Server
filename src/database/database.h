@@ -5,8 +5,9 @@
 #include <string>
 #include <optional>
 
-
 #include "api_chat.pb.h"
+
+#include "mysql_helper.h"
 
 class Database {
 public:
@@ -22,11 +23,11 @@ public:
 
     std::optional<api::chat::User> get_user_by_id(uint64_t user_id);
 
-    std::optional<api::chat::User> get_user_by_name(const std::string& user_name);
+    std::optional<api::chat::User> get_user_by_name(const std::string &user_name);
 
-    bool check_user_credentials(std::string &user_name, std::string &password);
+    bool check_user_credentials(uint64_t user_id, std::string &password);
 
-    std::optional<api::chat::User> valid_user_credentials(std::string &user_name, std::string &password);
+    std::optional<api::chat::User> valid_user_credentials(uint64_t user_id, std::string &password);
 
     std::list<api::chat::User> get_user_friends(uint64_t user_id);
 
@@ -48,23 +49,21 @@ public:
 
     //<editor-fold desc="Chat">
 
-    std::list<api::chat::Chat> get_all_chats();
-
-    std::optional<api::chat::Chat> get_chat_by_id(uint64_t chat_id);
-
-    std::list<api::chat::Chat> get_all_chats_for_user(uint64_t user_id);
+    std::optional<api::chat::Chat> get_group_chat_by_id(uint64_t chat_id);
 
     std::list<api::chat::Chat> get_all_group_chats_for_user(uint64_t user_id);
 
-    std::list<api::chat::Chat> get_all_private_chats_for_user(uint64_t user_id);
+    std::optional<api::chat::MessageList *> get_group_messages_by_id(uint64_t chat_id);
 
-    std::optional<api::chat::Chat> get_private_chat(uint64_t user1_id, uint64_t user2_id);
+    std::optional<api::chat::MessageList *> get_private_messages_by_id(uint64_t user1_id, uint64_t user2_id);
 
-    std::optional<api::chat::MessageList *> get_messages_by_id(uint64_t chat_id);
+    uint64_t create_group_chat_and_messages(std::string name);
 
-    uint64_t create_chat_and_messages(std::string name, bool is_group);
+    bool delete_group_chat_and_messages(uint64_t chat_id);
 
-    bool delete_chat_and_messages(uint64_t chat_id);
+    bool create_private_chat_and_messages(uint64_t user1_id, uint64_t user2_id);
+
+    bool delete_private_chat_and_messages(uint64_t user1_id, uint64_t user2_id);
 
     std::list<api::chat::User> get_chat_members(uint64_t chat_id);
 
@@ -76,21 +75,21 @@ public:
 
 private:
 
-    std::map<uint64_t, api::chat::Chat> _chats;
-    std::map<uint64_t, api::chat::MessageList> _messages;
+    std::map<uint64_t, api::chat::MessageList> _group_messages;
+    std::map<std::pair<uint64_t, uint64_t>, api::chat::MessageList> _private_messages;
 
-    std::map<uint64_t, api::chat::User> _users;
-    std::map<uint64_t, api::chat::UserCredentials> _user_credentials;
-
-    std::map<std::pair<uint64_t, uint64_t>, bool> _user_relationship;
-
-    typedef std::pair<uint64_t, uint64_t> user_group_relationship; // chat_id  <---> user_id
-    std::list<user_group_relationship> _chat_members;
+    MySQLHelper *helper;
 
     void setup_test_data();
 
-    uint64_t user_id_incremental = 10001;
-    uint64_t chat_id_incremental = 10;
+
+    static std::optional<api::chat::User> convert_user(const MySQLHelper::User &user_tuple);
+    static std::optional<api::chat::User> convert_user(const std::optional<MySQLHelper::User> &user_tuple);
+    static std::optional<api::chat::User> convert_friend(const MySQLHelper::Friend &friend_tuple);
+    static std::optional<api::chat::User> convert_friend(const std::optional<MySQLHelper::Friend> &friend_tuple);
+    static std::optional<api::chat::Chat> convert_group(const MySQLHelper::Group &group_tuple);
+    static std::optional<api::chat::Chat> convert_group(const std::optional<MySQLHelper::Group> &group_tuple);
+
 };
 
 
