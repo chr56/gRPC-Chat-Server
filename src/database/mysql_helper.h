@@ -6,12 +6,8 @@
 #include <tuple>
 #include <optional>
 
-#include <mysqlx/xdevapi.h>
-
 class MySQLHelper {
 private:
-    mysqlx::Session session;
-    mysqlx::Schema database;
     std::string host;
     std::string database_name;
     std::string password;
@@ -50,7 +46,5 @@ public:
     std::list<Group> get_all_groups_for_user(int user_id);
     std::list<User> get_group_members(int group_id);
 };
-
-#undef INTERNAL
 
 #endif //SERVER_MYSQL_HELPER_H

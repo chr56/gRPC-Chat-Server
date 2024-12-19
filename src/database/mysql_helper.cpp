@@ -4,23 +4,23 @@
 #include "mysql_helper.h"
 
 
+#include <mysqlx/xdevapi.h>
 #include <iostream>
 
 using namespace mysqlx;
 
 MySQLHelper::MySQLHelper(std::string host_, std::string database_name_, std::string password_)
-        : host(std::move(host_)), database_name(std::move(database_name_)), password(std::move(password_)),
-          session(host_, 33060, "root", password_), database(session.getSchema(database_name)) {}
+        : host(std::move(host_)), database_name(std::move(database_name_)), password(std::move(password_)) {}
 
-MySQLHelper::~MySQLHelper() {
-    session.close();
-}
+MySQLHelper::~MySQLHelper() = default;
 
 
 bool MySQLHelper::update(const std::string &table_name,
                          const std::string &id_name, int id,
                          const std::string &column, const std::string &value) {
     try {
+        Session session(host, 33060, "root", password);
+        Schema database = session.getSchema(database_name);
         Table table = database.getTable(table_name);
         const Result &result = table.update().set(column, value).where(id_name + " = :id").bind("id", id).execute();
         return result.getAffectedItemsCount() > 0;
@@ -33,6 +33,8 @@ bool MySQLHelper::update(const std::string &table_name,
 
 uint64_t MySQLHelper::add_new_user(const std::string &user_name, const std::string &user_password) {
     try {
+        Session session(host, 33060, "root", password);
+        Schema database = session.getSchema(database_name);
         Table table = database.getTable("user_info");
         const Result &result = table.insert("user_name", "user_password", "user_icon_path").values(user_name, user_password, "").execute();
         return result.getAutoIncrementValue();
@@ -44,6 +46,8 @@ uint64_t MySQLHelper::add_new_user(const std::string &user_name, const std::stri
 
 bool MySQLHelper::delete_user(int user_id) {
     try {
+        Session session(host, 33060, "root", password);
+        Schema database = session.getSchema(database_name);
         Table table = database.getTable("user_info");
         const Result &result = table.remove().where("user_id = :id").bind("id", user_id).execute();
         return result.getAffectedItemsCount() > 0;
@@ -55,6 +59,8 @@ bool MySQLHelper::delete_user(int user_id) {
 
 bool MySQLHelper::valid_user_password(int user_id, const std::string &password) {
     try {
+        Session session(host, 33060, "root", password);
+        Schema database = session.getSchema(database_name);
         Table table = database.getTable("user_info");
         RowResult result =
                 table.select("user_id").where("user_id = :id AND user_password = :pwd").bind("id", user_id).bind("pwd", password).execute();
@@ -67,6 +73,8 @@ bool MySQLHelper::valid_user_password(int user_id, const std::string &password) 
 
 std::string MySQLHelper::get_user_name(int id) {
     try {
+        Session session(host, 33060, "root", password);
+        Schema database = session.getSchema(database_name);
         Table table = database.getTable("user_info");
         RowResult result = table.select("user_name").where("user_id = :id").bind("id", id).execute();
 
@@ -82,6 +90,8 @@ std::string MySQLHelper::get_user_name(int id) {
 std::list<MySQLHelper::User> MySQLHelper::get_all_users() {
     std::list<User> users;
     try {
+        Session session(host, 33060, "root", password);
+        Schema database = session.getSchema(database_name);
         Table table = database.getTable("user_info");
         RowResult result = table.select("user_id", "user_name", "user_password").execute();
 
@@ -96,6 +106,8 @@ std::list<MySQLHelper::User> MySQLHelper::get_all_users() {
 
 std::optional<MySQLHelper::User> MySQLHelper::get_user_by_id(int user_id) {
     try {
+        Session session(host, 33060, "root", password);
+        Schema database = session.getSchema(database_name);
         Table table = database.getTable("user_info");
         RowResult result = table.select("user_id", "user_name", "user_password").where("user_id = :id").bind("id", user_id).execute();
 
@@ -110,6 +122,8 @@ std::optional<MySQLHelper::User> MySQLHelper::get_user_by_id(int user_id) {
 
 std::optional<MySQLHelper::User> MySQLHelper::get_user_by_name(const std::string &name) {
     try {
+        Session session(host, 33060, "root", password);
+        Schema database = session.getSchema(database_name);
         Table table = database.getTable("user_info");
         RowResult result = table.select("user_id", "user_name", "user_password").where("user_name = :name").bind("id", name).execute();
 
@@ -125,6 +139,8 @@ std::optional<MySQLHelper::User> MySQLHelper::get_user_by_name(const std::string
 
 bool MySQLHelper::make_friend(int user_id, int friend_id, const std::string &team) {
     try {
+        Session session(host, 33060, "root", password);
+        Schema database = session.getSchema(database_name);
         Table table = database.getTable("user_friend");
         auto r1 = table.insert("user_id", "friend_id", "team").values(user_id, friend_id, team).execute();
         auto r2 = table.insert("user_id", "friend_id", "team").values(friend_id, user_id, team).execute();
@@ -137,6 +153,8 @@ bool MySQLHelper::make_friend(int user_id, int friend_id, const std::string &tea
 
 bool MySQLHelper::remove_friend(int user_id, int friend_id) {
     try {
+        Session session(host, 33060, "root", password);
+        Schema database = session.getSchema(database_name);
         Table table = database.getTable("user_friend");
         auto r1 = table.remove().where("user_id = :id AND friend_id = :fid").bind("id", user_id).bind("fid", friend_id).execute();
         auto r2 = table.remove().where("user_id = :fid AND friend_id = :id").bind("id", user_id).bind("fid", friend_id).execute();
@@ -151,6 +169,8 @@ std::list<MySQLHelper::Friend> MySQLHelper::get_user_friends(int id) {
     std::list<Friend> friends;
 
     try {
+        Session session(host, 33060, "root", password);
+        Schema database = session.getSchema(database_name);
         Table table = database.getTable("user_friend");
         RowResult result = table.select("friend_id", "team").where("user_id = :id").bind("id", id).execute();
 
@@ -169,6 +189,8 @@ std::list<MySQLHelper::Friend> MySQLHelper::get_user_friends(int id) {
 
 uint64_t MySQLHelper::create_group(const std::string &group_name) {
     try {
+        Session session(host, 33060, "root", password);
+        Schema database = session.getSchema(database_name);
         Table table = database.getTable("group_info");
         const Result &result = table.insert("group_name").values(group_name).execute();
         return result.getAutoIncrementValue();
@@ -180,6 +202,8 @@ uint64_t MySQLHelper::create_group(const std::string &group_name) {
 
 bool MySQLHelper::delete_group(int group_id) {
     try {
+        Session session(host, 33060, "root", password);
+        Schema database = session.getSchema(database_name);
         Table table = database.getTable("group_info");
         const Result &result = table.remove().where("group_id = :id").bind("id", group_id).execute();
         return result.getAffectedItemsCount() > 0;
@@ -192,6 +216,8 @@ bool MySQLHelper::delete_group(int group_id) {
 std::list<MySQLHelper::Group> MySQLHelper::get_all_groups() {
     std::list<Group> groups;
     try {
+        Session session(host, 33060, "root", password);
+        Schema database = session.getSchema(database_name);
         Table group_info = database.getTable("group_info");
         RowResult result = group_info.select("group_id", "group_name").execute();
 
@@ -208,6 +234,8 @@ std::list<MySQLHelper::Group> MySQLHelper::get_all_groups() {
 
 std::optional<MySQLHelper::Group> MySQLHelper::get_group_by_id(int group_id) {
     try {
+        Session session(host, 33060, "root", password);
+        Schema database = session.getSchema(database_name);
         Table group_info = database.getTable("group_info");
         RowResult result = group_info.select("group_id", "group_name").where("group_id = :id").bind("id", group_id).execute();
 
@@ -227,6 +255,8 @@ std::optional<MySQLHelper::Group> MySQLHelper::get_group_by_id(int group_id) {
 std::list<MySQLHelper::User> MySQLHelper::get_group_members(int group_id) {
     std::list<User> users;
     try {
+        Session session(host, 33060, "root", password);
+        Schema database = session.getSchema(database_name);
         Table group_member = database.getTable("group_member");
         RowResult result = group_member.select("member_id").where("group_id = :group_id").bind("group_id", group_id).execute();
 
@@ -245,6 +275,8 @@ std::list<MySQLHelper::User> MySQLHelper::get_group_members(int group_id) {
 
 bool MySQLHelper::add_member(int group_id, int member_id) {
     try {
+        Session session(host, 33060, "root", password);
+        Schema database = session.getSchema(database_name);
         Table table = database.getTable("group_member");
         const Result &result =
                 table.insert("group_id", "member_id").values(group_id, member_id).execute();
@@ -257,6 +289,8 @@ bool MySQLHelper::add_member(int group_id, int member_id) {
 
 bool MySQLHelper::remove_member(int group_id, int member_id) {
     try {
+        Session session(host, 33060, "root", password);
+        Schema database = session.getSchema(database_name);
         Table table = database.getTable("group_member");
         const Result &result =
                 table.remove().where("group_id = :gid AND member_id = :mid").bind("gid", group_id).bind("mid", member_id).execute();
@@ -270,6 +304,8 @@ bool MySQLHelper::remove_member(int group_id, int member_id) {
 std::list<MySQLHelper::Group> MySQLHelper::get_all_groups_for_user(int user_id) {
     std::list<Group> groups;
     try {
+        Session session(host, 33060, "root", password);
+        Schema database = session.getSchema(database_name);
         Table table = database.getTable("group_member");
         RowResult result = table.select("group_id").where("member_id = :id").bind("id", user_id).execute();
 
