@@ -8,11 +8,9 @@
 
 using namespace mysqlx;
 
-
-MySQLHelper::MySQLHelper(const char *host, const char *database_name, const char *password)
-        : session(host, 33060, "root", password), database(session.getSchema(database_name)) {
-    std::cout << "Connected successfully using MySQL Connector/C++" << std::endl;
-}
+MySQLHelper::MySQLHelper(std::string host_, std::string database_name_, std::string password_)
+        : host(std::move(host_)), database_name(std::move(database_name_)), password(std::move(password_)),
+          session(host_, 33060, "root", password_), database(session.getSchema(database_name)) {}
 
 MySQLHelper::~MySQLHelper() {
     session.close();

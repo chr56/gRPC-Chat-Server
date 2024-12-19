@@ -12,6 +12,9 @@ class MySQLHelper {
 private:
     mysqlx::Session session;
     mysqlx::Schema database;
+    std::string host;
+    std::string database_name;
+    std::string password;
 
 public:
 
@@ -24,7 +27,7 @@ public:
     // group_id, name
     typedef std::tuple<int, std::string> Group;
 
-    MySQLHelper(const char *host, const char *database_name, const char *password);
+    MySQLHelper(std::string host_, std::string database_name_, std::string password_);
     ~MySQLHelper();
 
     bool update(const std::string &table_name, const std::string &id_name, int id, const std::string &column, const std::string &value);
