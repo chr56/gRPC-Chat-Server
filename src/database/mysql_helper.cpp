@@ -19,19 +19,21 @@ MySQLHelper::~MySQLHelper() {
 }
 
 
-bool MySQLHelper::update(std::string table_name, std::string id_name, int id, std::string column, std::string value) {
+bool MySQLHelper::update(const std::string &table_name,
+                         const std::string &id_name, int id,
+                         const std::string &column, const std::string &value) {
     try {
         Table table = database.getTable(table_name);
         const Result &result = table.update().set(column, value).where(id_name + " = :id").bind("id", id).execute();
         return result.getAffectedItemsCount() > 0;
     } catch (const std::exception &err) {
-        std::cerr << "Error on updating "<< table_name << ": " << err.what() << std::endl;
+        std::cerr << "Error on updating " << table_name << ": " << err.what() << std::endl;
     }
     return false;
 }
 
 
-int MySQLHelper::add_new_user(std::string user_name, std::string user_password) {
+uint64_t MySQLHelper::add_new_user(const std::string &user_name, const std::string &user_password) {
     try {
         Table table = database.getTable("user_info");
         const Result &result = table.insert("user_name", "user_password", "user_icon_path").values(user_name, user_password, "").execute();
@@ -53,7 +55,7 @@ bool MySQLHelper::delete_user(int user_id) {
     return false;
 }
 
-bool MySQLHelper::valid_user_password(int user_id, std::string password) {
+bool MySQLHelper::valid_user_password(int user_id, const std::string &password) {
     try {
         Table table = database.getTable("user_info");
         RowResult result =
@@ -108,7 +110,7 @@ std::optional<MySQLHelper::User> MySQLHelper::get_user_by_id(int user_id) {
     return std::nullopt;
 }
 
-std::optional<MySQLHelper::User> MySQLHelper::get_user_by_name(std::string name) {
+std::optional<MySQLHelper::User> MySQLHelper::get_user_by_name(const std::string &name) {
     try {
         Table table = database.getTable("user_info");
         RowResult result = table.select("user_id", "user_name", "user_password").where("user_name = :name").bind("id", name).execute();
@@ -123,7 +125,7 @@ std::optional<MySQLHelper::User> MySQLHelper::get_user_by_name(std::string name)
 }
 
 
-bool MySQLHelper::make_friend(int user_id, int friend_id, std::string team) {
+bool MySQLHelper::make_friend(int user_id, int friend_id, const std::string &team) {
     try {
         Table table = database.getTable("user_friend");
         auto r1 = table.insert("user_id", "friend_id", "team").values(user_id, friend_id, team).execute();
@@ -167,7 +169,7 @@ std::list<MySQLHelper::Friend> MySQLHelper::get_user_friends(int id) {
 }
 
 
-int MySQLHelper::create_group(std::string group_name) {
+uint64_t MySQLHelper::create_group(const std::string &group_name) {
     try {
         Table table = database.getTable("group_info");
         const Result &result = table.insert("group_name").values(group_name).execute();
